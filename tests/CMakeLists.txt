@@ -289,7 +289,7 @@ add_legacy_tests(
   global_transitivity
   harmonic_centrality
   hub_and_authority
-  igraph_adjacent_triangles
+  igraph_count_adjacent_triangles
   igraph_are_connected
   igraph_average_path_length
   igraph_average_path_length_dijkstra
@@ -1022,8 +1022,9 @@ add_benchmarks(
   igraph_vertex_connectivity
   igraph_voronoi
   inc_vs_adj
-  lad
   intersection
+  lad
+  modularity
 )
 
 # dot product

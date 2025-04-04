@@ -78,8 +78,10 @@
  *        and then \p maxiter iterations are performed.
  * \param kkconst The Kamada-Kawai vertex attraction constant.
  *        Typical value: number of vertices.
- * \param weights Edge weights, larger values will result longer edges.
- *        Weights must be positive. Pass \c NULL to assume unit weights
+ * \param weights A vector of edge weights. Weights are interpreted as edge
+ *        \em lengths in the shortest path calculation used by the
+ *        Kamada-Kawai algorithm. Therefore, vertices connected by high-weight
+ *        edges will be placed further apart. Pass \c NULL to assume unit weights
  *        for all edges.
  * \param minx Pointer to a vector, or a \c NULL pointer. If not a
  *        \c NULL pointer then the vector gives the minimum
@@ -179,8 +181,8 @@ igraph_error_t igraph_layout_kamada_kawai(const igraph_t *graph, igraph_matrix_t
 
     /* Find largest finite distance */
     max_dij = 0.0;
-    for (igraph_integer_t i = 0; i < vcount; i++) {
-        for (igraph_integer_t j = i + 1; j < vcount; j++) {
+    for (igraph_integer_t j = 0; j < vcount; j++) {
+        for (igraph_integer_t i = j + 1; i < vcount; i++) {
             if (!isfinite(MATRIX(dij, i, j))) {
                 continue;
             }
@@ -192,8 +194,8 @@ igraph_error_t igraph_layout_kamada_kawai(const igraph_t *graph, igraph_matrix_t
 
     /* Replace infinite distances by the largest finite distance,
      * effectively making the graph connected. */
-    for (igraph_integer_t i = 0; i < vcount; i++) {
-        for (igraph_integer_t j = 0; j < vcount; j++) {
+    for (igraph_integer_t j = 0; j < vcount; j++) {
+        for (igraph_integer_t i = 0; i < vcount; i++) {
             if (MATRIX(dij, i, j) > max_dij) {
                 MATRIX(dij, i, j) = max_dij;
             }
@@ -201,12 +203,12 @@ igraph_error_t igraph_layout_kamada_kawai(const igraph_t *graph, igraph_matrix_t
     }
 
     L = L0 / max_dij;
-    for (igraph_integer_t i = 0; i < vcount; i++) {
-        for (igraph_integer_t j = 0; j < vcount; j++) {
-            igraph_real_t tmp = MATRIX(dij, i, j) * MATRIX(dij, i, j);
+    for (igraph_integer_t j = 0; j < vcount; j++) {
+        for (igraph_integer_t i = 0; i < vcount; i++) {
             if (i == j) {
                 continue;
             }
+            igraph_real_t tmp = MATRIX(dij, i, j) * MATRIX(dij, i, j);
             MATRIX(kij, i, j) = kkconst / tmp;
             MATRIX(lij, i, j) = L * MATRIX(dij, i, j);
         }
@@ -215,9 +217,8 @@ igraph_error_t igraph_layout_kamada_kawai(const igraph_t *graph, igraph_matrix_t
     /* Initialize delta */
     IGRAPH_VECTOR_INIT_FINALLY(&D1, vcount);
     IGRAPH_VECTOR_INIT_FINALLY(&D2, vcount);
-    for (m = 0; m < vcount; m++) {
-        igraph_real_t myD1 = 0.0, myD2 = 0.0;
-        for (igraph_integer_t i = 0; i < vcount; i++) {
+    for (igraph_integer_t i = 0; i < vcount; i++) {
+        for (m = 0; m < vcount; m++) {
             igraph_real_t dx, dy, mi_dist;
             if (i == m) {
                 continue;
@@ -225,11 +226,9 @@ igraph_error_t igraph_layout_kamada_kawai(const igraph_t *graph, igraph_matrix_t
             dx = MATRIX(*res, m, 0) - MATRIX(*res, i, 0);
             dy = MATRIX(*res, m, 1) - MATRIX(*res, i, 1);
             mi_dist = sqrt(dx*dx + dy*dy);
-            myD1 += MATRIX(kij, m, i) * (dx - MATRIX(lij, m, i) * dx / mi_dist);
-            myD2 += MATRIX(kij, m, i) * (dy - MATRIX(lij, m, i) * dy / mi_dist);
+            VECTOR(D1)[m] += MATRIX(kij, m, i) * (dx - MATRIX(lij, m, i) * dx / mi_dist);
+            VECTOR(D2)[m] += MATRIX(kij, m, i) * (dy - MATRIX(lij, m, i) * dy / mi_dist);
         }
-        VECTOR(D1)[m] = myD1;
-        VECTOR(D2)[m] = myD2;
     }
 
     for (igraph_integer_t j = 0; j < maxiter; j++) {
@@ -383,8 +382,10 @@ igraph_error_t igraph_layout_kamada_kawai(const igraph_t *graph, igraph_matrix_t
  *        and then \p maxiter iterations are performed.
  * \param kkconst The Kamada-Kawai vertex attraction constant.
  *        Typical value: number of vertices.
- * \param weights Edge weights, larger values will result longer edges.
- *        Weights must be positive. Pass \c NULL to assume unit weights
+ * \param weights A vector of edge weights. Weights are interpreted as edge
+ *        \em lengths in the shortest path calculation used by the
+ *        Kamada-Kawai algorithm. Therefore, vertices connected by high-weight
+ *        edges will be placed further apart. Pass \c NULL to assume unit weights
  *        for all edges.
  * \param minx Pointer to a vector, or a \c NULL pointer. If not a
  *        \c NULL pointer then the vector gives the minimum
