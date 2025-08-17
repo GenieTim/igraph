@@ -4,23 +4,67 @@
 
 ### Added
 
+ - `igraph_layout_align()` attempts to align a graph layout with the coordinate axes in a visually pleasing manner (experimental function).
+ - `igraph_product()` supports the lexicographic, strong and modular graph products. Thanks to Gulshan Kumar @gulshan-123 for contributing this functionality in #2772 and #2793!
+ - `igraph_rooted_product()` computes the the rooted graph product. Thanks to Gulshan Kumar @gulshan-123 for contributing this functionality in #2793!
+ - `igraph_mycielskian()` and `igraph_mycielski_graph()` compute a Mycielski transformation of a graph, and a Mycielski graph, respectively. Thanks to Gulshan Kumar @gulshan-123 for contributing this functionality in #2741!
+ - `igraph_path_graph()` is a convenience wrapper for `igraph_ring()` with `circular=false`.
+ - `igraph_cycle_graph()` is a convenience wrapper for `igraph_ring()` with `circular=true`.
+ - `igraph_bond_percolation()`, `igraph_site_percolation()` and `igraph_edgelist_percolation()` calculates the time evolution of the size of the giant component of a graph when edges or vertices are added one by one in a certain (or random) order. Thanks to Arnór Friðriksson @Zepeacedust for implementing this in #2778!
+ - `igraph_invert_permutation()` inverts a permutation stored in an integer vector.
+ - `igraph_is_vertex_coloring()` and `igraph_is_edge_coloring()` check if a vertex or edge coloring is valid, i.e. whether adjacenct vertices/edges always have distinct colors. Thanks to Sarah Rashidi @its-serah for contributing this in #2807!
+ - `igraph_rich_club_sequence()` calculates how the density of a graph changes as vertices are removed. Thanks to Zara Zong @minifinity for contributing this in #2740!
+
+### Changed
+
+ - `igraph_bipartite_game_gnp()` can now generate graphs with more than a hundred million vertices. Thanks to Dev Lohani @devlohani99 for implementing this in #2767!
+ - `igraph_reindex_membership()` now supports arbitrary cluster indices. Previously, it would error when indices are not within `0 .. n-1` where `n` is the membership vector length.
+ - `igraph_modularity()` now supports arbitrary cluster indices. However, ensuring that cluster indices are within the range `0 .. n-1`, where `n` is the vertex count, allows for better performance.
+
+### Fixed
+
+ - Fix failure in SIR simulation due to roundoff errors creating slightly negative rates.
+ - Fix infinite coordinates for certain path graphs with `igraph_layout_kamada_kawai_3d()`.
+ - `igraph_community_leiden()` did not iterate until the partition ceased to change when `n_iterations < 0`. Thanks to Lucas Lopes Felipe @lucaslopes for fixing this in #2799!
+ - The widest path functions `igraph_widest_path_widths_floyd_warshall()`, `igraph_widest_path_widths_dijkstra()`, `igraph_get_widest_paths()`, and `igraph_get_widest_path()` incorrectly ignored edges with positive infinite width. Now they ignore edges with negative infinite width.
+
+### Deprecated
+
+ - `igraph_sparsemat()` and `igraph_weighted_sparsemat()` are now deprecated; their functionality is duplicated by `igraph_get_adjacency_sparse()`. They will be removed in veresion 1.0.
+ - `igraph_convex_hull()` is deprecated in favour of `igraph_convex_hull_2d()` and scheduled for removal in 1.0.
+
+### Other
+
+ - Documentation improvements, including a new glossary.
+ - Simple cycle search (`igraph_simple_cycles()` and `igraph_simple_cycles_callback()`) is sped up by skipping cycle search from some redundant start vertices. Thanks to Tim Bernhard @GenieTim for contributing this improvement in #2714!
+
+## [0.10.16] - 2025-06-10
+
+### Added
+
  - `igraph_count_triangles()` counts undirected triangles in a graph.
  - `igraph_count_adjacent_triangles()` (rename of `igraph_adjacent_triangles()`).
  - `igraph_rng_get_bool()` and `RNG_BOOL()` produce a single random boolean.
+ - `igraph_product()` computes various kinds of graph products of two graphs. Thanks to Gulshan Kumar @gulshan-123 for contributing this functionality in #2748!
 
 ### Changed
 
  - `igraph_neighborhood_size()`, `igraph_neighborhood()` and `igraph_neighborhood_graphs()` now accept a negative `order` value and interpret it as infinite order. Previously, a negative `order` value was disallowed.
  - `igraph_famous()` now accepts `Groetzsch` as an alias of `Grotzsch`.
+ - `igraph_vertex_path_from_edge_path()` can now determine the start vertex automatically.
 
 ### Fixed
 
  - `igraph_largest_independent_vertex_sets()` and `igraph_maximal_independent_vertex_sets()` would sometimes return incorrect results for graphs with self-loops. This is now corrected.
+ - `igraph_vertex_path_from_edge_path()` now validates the start vertex.
+ - Fixed a memory leak in the GraphML parser for cases when the `id` attribute was specified multiple times within the same XML tag.
 
 ### Deprecated
 
  - The undocumented function `igraph_vector_sumsq()` is deprecated. Use `igraph_blas_dnrm2()` to compute the Euclidean norm of real vectors.
  - `igraph_adjacent_triangles()` is deprecated and scheduled for removal in 1.0.
+ - `igraph_deterministic_optimal_imitation()`, `igraph_moran_process()`, `igraph_roulette_wheel_imitation()` and `igraph_stochastic_imitation()` are now deprecated and scheduled for removal in 1.0.
+ - `igraph_rng_get_dirichlet()` is deprecated and scheduled for removal in 1.0. Its interface is inconsistent with the other `igraph_rng_get_...()` functions and we have a replacemenet for it in `igraph_sample_dirichlet()`. igraph 1.0 will gain an `igraph_rng_sample_dirichlet()` function that lets the caller pass in an `igraph_rng_t` instance as well.
 
 ### Other
 
@@ -30,7 +74,7 @@
  - Re-translated vendored BLAS/LAPACK/ARPACK sources with f2c version 20240504.
  - The performance of `igraph_transitivity_undirected()` is improved by a factor of about 2.5.
  - The performance of `igraph_degree_sequence_game()` is improved when using `IGRAPH_DEGSEQ_CONFIGURATION_SIMPLE`.
- - Documentation improvements.
+ - Documentation improvements and fixes.
 
 ## [0.10.15]
 
@@ -1477,7 +1521,8 @@ Some of the highlights are:
  - Provide proper support for Windows, using `__declspec(dllexport)` and `__declspec(dllimport)` for `DLL`s and static usage by using `#define IGRAPH_STATIC 1`.
  - Provided integer versions of `dqueue` and `stack` data types.
 
-[master]: https://github.com/igraph/igraph/compare/0.10.15..master
+[master]: https://github.com/igraph/igraph/compare/0.10.16..master
+[0.10.16]: https://github.com/igraph/igraph/compare/0.10.15..0.10.16
 [0.10.15]: https://github.com/igraph/igraph/compare/0.10.13..0.10.15
 [0.10.13]: https://github.com/igraph/igraph/compare/0.10.12..0.10.13
 [0.10.12]: https://github.com/igraph/igraph/compare/0.10.11..0.10.12

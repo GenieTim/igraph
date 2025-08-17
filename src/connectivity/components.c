@@ -425,7 +425,7 @@ static igraph_error_t igraph_i_is_connected_weak(const igraph_t *graph, igraph_b
  * time.
  *
  * \param graph The graph object to analyze.
- * \param res Pointer to a logical variable, the result will be stored
+ * \param res Pointer to a Boolean variable, the result will be stored
  *        here.
  * \param mode For a directed graph this specifies whether to calculate
  *        weak or strong connectedness. Possible values:
@@ -434,6 +434,9 @@ static igraph_error_t igraph_i_is_connected_weak(const igraph_t *graph, igraph_b
  *        ignored for undirected graphs.
  * \return Error code:
  *        \c IGRAPH_EINVAL: invalid mode argument.
+ *
+ * \sa \ref igraph_connected_components() to find the connected components,
+ * \ref igraph_is_biconnected() to check if the graph is 2-vertex-connected.
  *
  * Time complexity: O(|V|+|E|), the
  * number of vertices
@@ -1275,7 +1278,7 @@ igraph_error_t igraph_biconnected_components(const igraph_t *graph,
  * two connected vertices as biconnected, however, igraph does.
  *
  * \param graph The input graph. It will be treated as undirected.
- * \param result If not a \c NULL pointer, the result will be returned here.
+ * \param res If not a \c NULL pointer, the result will be returned here.
  * \return Error code.
  *
  * Time complexity: O(|V|+|E|), linear in the number of vertices and edges.
@@ -1421,7 +1424,7 @@ exit2:
  * connected components in the graph.
  *
  * \param graph The input graph. It will be treated as undirected.
- * \param res Pointer to an initialized vector, the
+ * \param bridges Pointer to an initialized vector, the
  *    bridges will be stored here as edge indices.
  * \return Error code.
  *

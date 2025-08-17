@@ -143,6 +143,14 @@ igraph_ring:
         OUT GRAPH graph, INTEGER n, BOOLEAN directed=False, BOOLEAN mutual=False,
         BOOLEAN circular=True
 
+igraph_path_graph:
+    PARAMS: |-
+        OUT GRAPH graph, INTEGER n, BOOLEAN directed=False, BOOLEAN mutual=False
+
+igraph_cycle_graph:
+    PARAMS: |-
+        OUT GRAPH graph, INTEGER n, BOOLEAN directed=False, BOOLEAN mutual=False
+
 igraph_kary_tree:
     PARAMS: OUT GRAPH graph, INTEGER n, INTEGER children=2, TREE_MODE type=OUT
 
@@ -184,6 +192,9 @@ igraph_famous:
 
 igraph_lcf_vector:
     PARAMS: OUT GRAPH graph, INTEGER n, VECTOR_INT shifts, INTEGER repeats=1
+
+igraph_mycielski_graph:
+    PARAMS: OUT GRAPH graph, INTEGER k
 
 igraph_adjlist:
     PARAMS: |-
@@ -950,6 +961,16 @@ igraph_degree_correlation_vector:
         BOOLEAN directed_neighbors=True
     DEPS: weights ON graph
 
+igraph_rich_club_sequence:
+  PARAMS: |-
+      GRAPH graph, OPTIONAL EDGEWEIGHTS weights,
+      OUT VECTOR res,
+      INDEX_VECTOR vertex_order,
+      BOOLEAN normalized=True,
+      BOOLEAN loops=False,
+      BOOLEAN directed=True
+  DEPS: weights ON graph
+
 igraph_strength:
     PARAMS: |-
         GRAPH graph, OUT VERTEX_QTY res, VERTEX_SELECTOR vids=ALL,
@@ -1305,6 +1326,21 @@ igraph_count_reachable:
     PARAMS: GRAPH graph, OUT VECTOR_INT counts, NEIMODE mode
 
 #######################################
+# Percolation
+#######################################
+
+igraph_bond_percolation:
+    PARAMS: GRAPH graph, OUT VECTOR_INT giant_size, OUT VECTOR_INT vetex_count, OPTIONAL EDGE_INDICES edge_order
+    DEPS: edge_order ON graph
+
+igraph_site_percolation:
+    PARAMS: GRAPH graph, OUT VECTOR_INT giant_size, OUT VECTOR_INT edge_count, OPTIONAL VERTEX_INDICES vertex_order
+    DEPS: vertex_order ON graph
+
+igraph_edgelist_percolation:
+    PARAMS: VERTEX_INDEX_PAIRS edges, OUT VECTOR_INT giant_size, OUT VECTOR_INT vertex_count
+
+#######################################
 # Cliques
 #######################################
 
@@ -1565,6 +1601,9 @@ igraph_layout_umap_3d:
 igraph_layout_umap_compute_weights:
     PARAMS: |-
         GRAPH graph, VECTOR distances, INOUT VECTOR weights
+
+igraph_layout_align:
+    PARAMS: GRAPH graph, INOUT MATRIX layout
 
 #######################################
 # Cocitation and other similarity measures
@@ -2080,6 +2119,19 @@ igraph_induced_subgraph_map:
         OPTIONAL OUT INDEX_VECTOR map, OPTIONAL OUT INDEX_VECTOR invmap
     DEPS: vids ON graph
 
+igraph_mycielskian:
+    PARAMS: |-
+        IN GRAPH graph, OUT GRAPH res, INTEGER k=1
+
+igraph_product:
+    PARAMS: |-
+        OUT GRAPH res, GRAPH g1, GRAPH g2, GRAPH_PRODUCT_TYPE type=CARTESIAN
+
+igraph_rooted_product:
+    PARAMS: |-
+        OUT GRAPH res, GRAPH g1, GRAPH g2, VERTEX root
+    DEPS: root ON g2
+
 #######################################
 # Maximum flows, minimum cuts
 #######################################
@@ -2502,7 +2554,7 @@ igraph_running_mean:
 igraph_random_sample:
     PARAMS: OUT VECTOR_INT res, INTEGER l, INTEGER h, INTEGER length
 
-igraph_convex_hull:
+igraph_convex_hull_2d:
     PARAMS: MATRIX data, OUT INDEX_VECTOR resverts, OUT MATRIX rescoords
 
 igraph_dim_select:
@@ -2636,6 +2688,18 @@ igraph_vertex_coloring_greedy:
     PARAMS: GRAPH graph, OUT VERTEX_COLOR colors, GREEDY_COLORING_HEURISTIC heuristic=NEIGHBORS
     DEPS: colors ON graph
 
+igraph_is_vertex_coloring:
+    PARAMS: GRAPH graph, VERTEX_COLOR types, OUT BOOLEAN res
+    DEPS: types ON graph
+
+igraph_is_bipartite_coloring:
+    PARAMS: GRAPH graph, BIPARTITE_TYPES types, OUT BOOLEAN res, OPTIONAL OUT NEIMODE mode
+    DEPS: types ON graph
+
+igraph_is_edge_coloring:
+    PARAMS: GRAPH graph, EDGE_COLOR types, OUT BOOLEAN res
+    DEPS: types ON graph
+
 #######################################
 # Microscopic update
 #######################################
@@ -2701,7 +2765,7 @@ igraph_invalidate_cache:
 
 igraph_vertex_path_from_edge_path:
     PARAMS: |-
-        GRAPH graph, VERTEX start, EDGE_INDICES edge_path,
+        GRAPH graph, OPTIONAL VERTEX start, EDGE_INDICES edge_path,
         OUT VERTEX_INDICES vertex_path, NEIMODE mode=OUT
 
 #######################################
