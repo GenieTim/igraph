@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2005-2021 The igraph development team
 
    This program is free software; you can redistribute it and/or modify
@@ -71,11 +70,11 @@
  *
  * \example examples/simple/igraph_star.c
  */
-igraph_error_t igraph_star(igraph_t *graph, igraph_integer_t n, igraph_star_mode_t mode,
-                igraph_integer_t center) {
+igraph_error_t igraph_star(igraph_t *graph, igraph_int_t n, igraph_star_mode_t mode,
+                igraph_int_t center) {
 
     igraph_vector_int_t edges = IGRAPH_VECTOR_NULL;
-    igraph_integer_t i;
+    igraph_int_t i;
 
     if (n < 0) {
         IGRAPH_ERROR("Invalid number of vertices.", IGRAPH_EINVVID);
@@ -89,11 +88,11 @@ igraph_error_t igraph_star(igraph_t *graph, igraph_integer_t n, igraph_star_mode
     }
 
     if (mode != IGRAPH_STAR_MUTUAL) {
-        igraph_integer_t no_of_edges2;
+        igraph_int_t no_of_edges2;
         IGRAPH_SAFE_MULT(n-1, 2, &no_of_edges2);
         IGRAPH_VECTOR_INT_INIT_FINALLY(&edges, no_of_edges2);
     } else {
-        igraph_integer_t no_of_edges2;
+        igraph_int_t no_of_edges2;
         IGRAPH_SAFE_MULT(n-1, 4, &no_of_edges2);
         IGRAPH_VECTOR_INT_INIT_FINALLY(&edges, no_of_edges2);
     }
@@ -191,12 +190,12 @@ igraph_error_t igraph_star(igraph_t *graph, igraph_integer_t n, igraph_star_mode
  *
  */
 
-igraph_error_t igraph_wheel(igraph_t *graph, igraph_integer_t n, igraph_wheel_mode_t mode,
-                igraph_integer_t center) {
+igraph_error_t igraph_wheel(igraph_t *graph, igraph_int_t n, igraph_wheel_mode_t mode,
+                igraph_int_t center) {
 
     igraph_star_mode_t star_mode;
     igraph_vector_int_t rim_edges = IGRAPH_VECTOR_NULL;
-    igraph_integer_t i;
+    igraph_int_t i;
 
     /* Firstly creates a star by the function \ref igraph_star() and makes
      * use of its existing input parameter checking ability, it can check
@@ -287,29 +286,6 @@ igraph_error_t igraph_wheel(igraph_t *graph, igraph_integer_t n, igraph_wheel_mo
 
 /**
  * \ingroup generators
- * \function igraph_lattice
- * \brief Arbitrary dimensional square lattices (deprecated).
- *
- * \deprecated-by igraph_square_lattice 0.10.0
- */
-igraph_error_t igraph_lattice(igraph_t *graph, const igraph_vector_int_t *dimvector,
-                   igraph_integer_t nei, igraph_bool_t directed, igraph_bool_t mutual,
-                   igraph_bool_t circular) {
-    igraph_vector_bool_t periodic;
-
-    IGRAPH_VECTOR_BOOL_INIT_FINALLY(&periodic, igraph_vector_int_size(dimvector));
-    igraph_vector_bool_fill(&periodic, circular);
-
-    IGRAPH_CHECK(igraph_square_lattice(graph, dimvector, nei, directed, mutual, &periodic));
-
-    igraph_vector_bool_destroy(&periodic);
-    IGRAPH_FINALLY_CLEAN(1);
-
-    return IGRAPH_SUCCESS;
-}
-
-/**
- * \ingroup generators
  * \function igraph_square_lattice
  * \brief Arbitrary dimensional square lattices.
  *
@@ -357,15 +333,15 @@ igraph_error_t igraph_lattice(igraph_t *graph, const igraph_vector_int_t *dimvec
  * is the average degree of the graph, k is the \p nei argument.
  */
 igraph_error_t igraph_square_lattice(
-    igraph_t *graph, const igraph_vector_int_t *dimvector, igraph_integer_t nei,
+    igraph_t *graph, const igraph_vector_int_t *dimvector, igraph_int_t nei,
     igraph_bool_t directed, igraph_bool_t mutual, const igraph_vector_bool_t *periodic
 ) {
 
-    igraph_integer_t dims = igraph_vector_int_size(dimvector);
-    igraph_integer_t no_of_nodes;
+    igraph_int_t dims = igraph_vector_int_size(dimvector);
+    igraph_int_t no_of_nodes;
     igraph_vector_int_t edges = IGRAPH_VECTOR_NULL;
-    igraph_integer_t *coords, *weights;
-    igraph_integer_t i, j;
+    igraph_int_t *coords, *weights;
+    igraph_int_t i, j;
     int carry, pos;
     int iter = 0;
 
@@ -386,11 +362,11 @@ igraph_error_t igraph_square_lattice(
 
     /* init coords & weights */
 
-    coords = IGRAPH_CALLOC(dims, igraph_integer_t);
+    coords = IGRAPH_CALLOC(dims, igraph_int_t);
     IGRAPH_CHECK_OOM(coords, "Lattice creation failed.");
     IGRAPH_FINALLY(igraph_free, coords);
 
-    weights = IGRAPH_CALLOC(dims, igraph_integer_t);
+    weights = IGRAPH_CALLOC(dims, igraph_int_t);
     IGRAPH_CHECK_OOM(weights, "Lattice creation failed.");
     IGRAPH_FINALLY(igraph_free, weights);
 
@@ -403,12 +379,12 @@ igraph_error_t igraph_square_lattice(
 
     IGRAPH_VECTOR_INT_INIT_FINALLY(&edges, 0);
     if (mutual && directed) {
-        igraph_integer_t no_of_edges2;
+        igraph_int_t no_of_edges2;
         IGRAPH_SAFE_MULT(no_of_nodes, dims, &no_of_edges2);
         IGRAPH_SAFE_MULT(no_of_edges2, 2, &no_of_edges2);
         IGRAPH_CHECK(igraph_vector_int_reserve(&edges, no_of_edges2));
     } else {
-        igraph_integer_t no_of_edges2;
+        igraph_int_t no_of_edges2;
         IGRAPH_SAFE_MULT(no_of_nodes, dims, &no_of_edges2);
         IGRAPH_CHECK(igraph_vector_int_reserve(&edges, no_of_edges2));
     }
@@ -423,7 +399,7 @@ igraph_error_t igraph_square_lattice(
             igraph_bool_t is_periodic = IS_PERIODIC(j);
 
             if (is_periodic|| coords[j] != VECTOR(*dimvector)[j] - 1) {
-                igraph_integer_t new_nei;
+                igraph_int_t new_nei;
                 if (coords[j] != VECTOR(*dimvector)[j] - 1) {
                     new_nei = i + weights[j] + 1;
                 } else {
@@ -436,7 +412,7 @@ igraph_error_t igraph_square_lattice(
                 }
             } /* if is_periodic || coords[j] */
             if (mutual && directed && (is_periodic || coords[j] != 0)) {
-                igraph_integer_t new_nei;
+                igraph_int_t new_nei;
                 if (coords[j] != 0) {
                     new_nei = i - weights[j] + 1;
                 } else {
@@ -514,12 +490,12 @@ igraph_error_t igraph_square_lattice(
  *
  * \example examples/simple/igraph_ring.c
  */
-igraph_error_t igraph_ring(igraph_t *graph, igraph_integer_t n, igraph_bool_t directed,
+igraph_error_t igraph_ring(igraph_t *graph, igraph_int_t n, igraph_bool_t directed,
                 igraph_bool_t mutual, igraph_bool_t circular) {
 
     igraph_vector_int_t edges;
-    igraph_integer_t no_of_edges, no_of_edges2;
-    igraph_integer_t i;
+    igraph_int_t no_of_edges, no_of_edges2;
+    igraph_int_t i;
 
     if (n < 0) {
         IGRAPH_ERRORF("The number of vertices must be non-negative, got %" IGRAPH_PRId ".", IGRAPH_EINVAL, n);
@@ -590,7 +566,7 @@ igraph_error_t igraph_ring(igraph_t *graph, igraph_integer_t n, igraph_bool_t di
  * Time complexity: O(|V|), the number of vertices in the graph.
  */
 igraph_error_t igraph_path_graph(
-        igraph_t *graph, igraph_integer_t n,
+        igraph_t *graph, igraph_int_t n,
         igraph_bool_t directed, igraph_bool_t mutual) {
     return igraph_ring(graph, n, directed, mutual, /* circular= */ false);
 }
@@ -620,7 +596,7 @@ igraph_error_t igraph_path_graph(
  * Time complexity: O(|V|), the number of vertices in the graph.
  */
 igraph_error_t igraph_cycle_graph(
-        igraph_t *graph, igraph_integer_t n,
+        igraph_t *graph, igraph_int_t n,
         igraph_bool_t directed, igraph_bool_t mutual) {
     return igraph_ring(graph, n, directed, mutual, /* circular= */ true);
 }
@@ -672,13 +648,13 @@ igraph_error_t igraph_cycle_graph(
  *
  * \example examples/simple/igraph_kary_tree.c
  */
-igraph_error_t igraph_kary_tree(igraph_t *graph, igraph_integer_t n, igraph_integer_t children,
+igraph_error_t igraph_kary_tree(igraph_t *graph, igraph_int_t n, igraph_int_t children,
                 igraph_tree_mode_t type) {
 
     igraph_vector_int_t edges = IGRAPH_VECTOR_NULL;
-    igraph_integer_t i, j;
-    igraph_integer_t idx = 0;
-    igraph_integer_t to = 1;
+    igraph_int_t i, j;
+    igraph_int_t idx = 0;
+    igraph_int_t to = 1;
 
     if (n < 0) {
         IGRAPH_ERROR("Number of vertices cannot be negative.", IGRAPH_EINVAL);
@@ -692,7 +668,7 @@ igraph_error_t igraph_kary_tree(igraph_t *graph, igraph_integer_t n, igraph_inte
     }
 
     {
-        igraph_integer_t no_of_edges2;
+        igraph_int_t no_of_edges2;
         if (n > 0) {
             IGRAPH_SAFE_MULT(n-1, 2, &no_of_edges2);
         } else {
@@ -725,18 +701,6 @@ igraph_error_t igraph_kary_tree(igraph_t *graph, igraph_integer_t n, igraph_inte
     igraph_vector_int_destroy(&edges);
     IGRAPH_FINALLY_CLEAN(1);
     return IGRAPH_SUCCESS;
-}
-
-/**
- * \ingroup generators
- * \function igraph_tree
- * \brief Creates a k-ary tree in which almost all vertices have k children (deprecated alias).
- *
- * \deprecated-by igraph_kary_tree 0.10.0
- */
-igraph_error_t igraph_tree(igraph_t *graph, igraph_integer_t n, igraph_integer_t children,
-                igraph_tree_mode_t type) {
-    return igraph_kary_tree(graph, n, children, type);
 }
 
 /**
@@ -780,8 +744,8 @@ igraph_error_t igraph_symmetric_tree(igraph_t *graph, const igraph_vector_int_t 
                 igraph_tree_mode_t type) {
 
     igraph_vector_int_t edges;
-    igraph_integer_t j, k, temp, no_of_nodes, idx, parent, child, level_end;
-    igraph_integer_t branching_counts_size = igraph_vector_int_size(branches);
+    igraph_int_t j, k, temp, no_of_nodes, idx, parent, child, level_end;
+    igraph_int_t branching_counts_size = igraph_vector_int_size(branches);
 
     if (type != IGRAPH_TREE_OUT && type != IGRAPH_TREE_IN && type != IGRAPH_TREE_UNDIRECTED) {
         IGRAPH_ERROR("Invalid tree orientation type.", IGRAPH_EINVMODE);
@@ -800,7 +764,7 @@ igraph_error_t igraph_symmetric_tree(igraph_t *graph, const igraph_vector_int_t 
 
     /* Trees have precisely |E| = |V| - 1 edges. */
     {
-        igraph_integer_t no_of_edges2;
+        igraph_int_t no_of_edges2;
         IGRAPH_SAFE_MULT(no_of_nodes - 1, 2, &no_of_edges2);
         IGRAPH_VECTOR_INT_INIT_FINALLY(&edges, no_of_edges2);
     }
@@ -874,7 +838,7 @@ igraph_error_t igraph_symmetric_tree(igraph_t *graph, const igraph_vector_int_t 
  * \example examples/simple/igraph_regular_tree.c
  */
 
-igraph_error_t igraph_regular_tree(igraph_t *graph, igraph_integer_t h, igraph_integer_t k, igraph_tree_mode_t type) {
+igraph_error_t igraph_regular_tree(igraph_t *graph, igraph_int_t h, igraph_int_t k, igraph_tree_mode_t type) {
     igraph_vector_int_t branching_counts;
 
     if (h < 1) {
@@ -932,19 +896,18 @@ igraph_error_t igraph_regular_tree(igraph_t *graph, igraph_integer_t h, igraph_i
  * \param directed Whether the graph should be directed.
  * \return Error code.
  *
- * \sa \ref igraph_ring(), \ref igraph_lcf(), \ref igraph_lcf_vector(),
- * \ref igraph_circulant()
+ * \sa \ref igraph_ring(), \ref igraph_lcf(), \ref igraph_circulant()
  *
  * Time complexity: O(|V|+|E|), the number of vertices plus the number
  * of edges.
  */
 igraph_error_t igraph_extended_chordal_ring(
-    igraph_t *graph, igraph_integer_t nodes, const igraph_matrix_int_t *W,
+    igraph_t *graph, igraph_int_t nodes, const igraph_matrix_int_t *W,
     igraph_bool_t directed) {
     igraph_vector_int_t edges;
-    igraph_integer_t period = igraph_matrix_int_ncol(W);
-    igraph_integer_t nrow   = igraph_matrix_int_nrow(W);
-    igraph_integer_t i, j, mpos = 0, epos = 0;
+    igraph_int_t period = igraph_matrix_int_ncol(W);
+    igraph_int_t nrow   = igraph_matrix_int_nrow(W);
+    igraph_int_t i, j, mpos = 0, epos = 0;
 
     if (nodes < 3) {
         IGRAPH_ERROR("An extended chordal ring has at least 3 nodes.", IGRAPH_EINVAL);
@@ -957,7 +920,7 @@ igraph_error_t igraph_extended_chordal_ring(
 
     {
         /* ecount = nodes + nodes * nrow */
-        igraph_integer_t no_of_edges2;
+        igraph_int_t no_of_edges2;
         IGRAPH_SAFE_MULT(nodes, nrow, &no_of_edges2);
         IGRAPH_SAFE_ADD(no_of_edges2, nodes, &no_of_edges2);
         IGRAPH_SAFE_MULT(no_of_edges2, 2, &no_of_edges2);
@@ -974,8 +937,8 @@ igraph_error_t igraph_extended_chordal_ring(
     if (nrow > 0) {
         for (i = 0; i < nodes; i++) {
             for (j = 0; j < nrow; j++) {
-                igraph_integer_t offset = MATRIX(*W, j, mpos);
-                igraph_integer_t v = (i + offset) % nodes;
+                igraph_int_t offset = MATRIX(*W, j, mpos);
+                igraph_int_t v = (i + offset) % nodes;
 
                 if (v < 0) {
                     v += nodes;    /* handle negative offsets */
@@ -1001,8 +964,6 @@ igraph_error_t igraph_extended_chordal_ring(
  * \function igraph_hypercube
  * \brief The n-dimensional hypercube graph.
  *
- * \experimental
- *
  * The hypercube graph \c Q_n has <code>2^n</code> vertices and
  * <code>2^(n-1) n</code> edges. Two vertices are connected when the binary
  * representations of their zero-based vertex IDs differs in precisely one bit.
@@ -1018,15 +979,19 @@ igraph_error_t igraph_extended_chordal_ring(
  * Time complexity: O(2^n)
  */
 igraph_error_t igraph_hypercube(igraph_t *graph,
-                                igraph_integer_t n, igraph_bool_t directed) {
+                                igraph_int_t n, igraph_bool_t directed) {
 
     /* An n-dimensional hypercube graph has 2^n vertices and 2^(n-1)*n edges.
      * The maximum possible dimension is calculated with the assumption that
      * the largest possible edge count is no more than half IGRAPH_INTEGER_MAX,
      * which is in fact the current limit. */
 
-    const igraph_integer_t maxn =
-        (IGRAPH_INTEGER_SIZE - 1) - (igraph_integer_t) ceil(log2(IGRAPH_INTEGER_SIZE));
+    const igraph_int_t maxn =
+        (IGRAPH_INTEGER_SIZE - 1) - (igraph_int_t) ceil(log2(IGRAPH_INTEGER_SIZE));
+
+    if (n < 0) {
+        IGRAPH_ERROR("Hypercube dimension must not be negative.", IGRAPH_EINVAL);
+    }
 
     if (n > maxn) {
         IGRAPH_ERRORF("The requested hypercube graph dimension (%" IGRAPH_PRId
@@ -1036,19 +1001,19 @@ igraph_error_t igraph_hypercube(igraph_t *graph,
 
     /* Integer overflow is no longer a concern after the above check. */
 
-    const igraph_integer_t vcount = (igraph_integer_t) 1 << n;
-    const igraph_integer_t ecount = n > 0 ? ((igraph_integer_t) 1 << (n-1)) * n : 0; /* avoid UBSan warning */
+    const igraph_int_t vcount = (igraph_int_t) 1 << n;
+    const igraph_int_t ecount = n > 0 ? ((igraph_int_t) 1 << (n-1)) * n : 0; /* avoid UBSan warning */
     igraph_vector_int_t edges;
-    igraph_integer_t p;
+    igraph_int_t p;
     int iter = 0;
 
     IGRAPH_VECTOR_INT_INIT_FINALLY(&edges, 2*ecount);
 
     p = 0;
-    for (igraph_integer_t v=0; v < vcount; v++) {
-        igraph_integer_t bit = 1;
-        for (igraph_integer_t i=0; i < n; i++) {
-            const igraph_integer_t u = v ^ bit;
+    for (igraph_int_t v=0; v < vcount; v++) {
+        igraph_int_t bit = 1;
+        for (igraph_int_t i=0; i < n; i++) {
+            const igraph_int_t u = v ^ bit;
             if (v < u) {
                 VECTOR(edges)[p++] = v;
                 VECTOR(edges)[p++] = u;

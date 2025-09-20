@@ -1,8 +1,6 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
-   Copyright (C) 2007-2012  Gabor Csardi <csardi.gabor@gmail.com>
-   334 Harvard street, Cambridge, MA 02139 USA
+   igraph library.
+   Copyright (C) 2007-2025  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,10 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc.,  51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301 USA
-
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 /**
@@ -33,12 +28,12 @@ typedef struct TYPE(igraph_dqueue) {
     BASE *stor_end;
 } TYPE(igraph_dqueue);
 
-IGRAPH_EXPORT igraph_error_t FUNCTION(igraph_dqueue, init)(TYPE(igraph_dqueue)* q, igraph_integer_t capacity);
+IGRAPH_EXPORT igraph_error_t FUNCTION(igraph_dqueue, init)(TYPE(igraph_dqueue)* q, igraph_int_t capacity);
 IGRAPH_EXPORT void FUNCTION(igraph_dqueue, destroy)(TYPE(igraph_dqueue)* q);
 IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_bool_t FUNCTION(igraph_dqueue, empty)(const TYPE(igraph_dqueue)* q);
 IGRAPH_EXPORT void FUNCTION(igraph_dqueue, clear)(TYPE(igraph_dqueue)* q);
 IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_bool_t FUNCTION(igraph_dqueue, full)(TYPE(igraph_dqueue)* q);
-IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_integer_t FUNCTION(igraph_dqueue, size)(const TYPE(igraph_dqueue)* q);
+IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_int_t FUNCTION(igraph_dqueue, size)(const TYPE(igraph_dqueue)* q);
 IGRAPH_EXPORT BASE FUNCTION(igraph_dqueue, pop)(TYPE(igraph_dqueue)* q);
 IGRAPH_EXPORT BASE FUNCTION(igraph_dqueue, pop_back)(TYPE(igraph_dqueue)* q);
 IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE BASE FUNCTION(igraph_dqueue, head)(const TYPE(igraph_dqueue)* q);
@@ -46,5 +41,4 @@ IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE BASE FUNCTION(igraph_dqueue, back)(const TYPE
 IGRAPH_EXPORT igraph_error_t FUNCTION(igraph_dqueue, push)(TYPE(igraph_dqueue)* q, BASE elem);
 IGRAPH_EXPORT igraph_error_t FUNCTION(igraph_dqueue, print)(const TYPE(igraph_dqueue)* q);
 IGRAPH_EXPORT igraph_error_t FUNCTION(igraph_dqueue, fprint)(const TYPE(igraph_dqueue)* q, FILE *file);
-IGRAPH_EXPORT BASE FUNCTION(igraph_dqueue, get)(const TYPE(igraph_dqueue) *q, igraph_integer_t idx);
-IGRAPH_DEPRECATED IGRAPH_EXPORT BASE FUNCTION(igraph_dqueue, e)(const TYPE(igraph_dqueue) *q, igraph_integer_t idx);
+IGRAPH_EXPORT BASE FUNCTION(igraph_dqueue, get)(const TYPE(igraph_dqueue) *q, igraph_int_t idx);

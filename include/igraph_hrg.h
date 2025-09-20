@@ -1,8 +1,6 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
-   Copyright (C) 2009-2012  Gabor Csardi <csardi.gabor@gmail.com>
-   334 Harvard street, Cambridge, MA 02139 USA
+   igraph library.
+   Copyright (C) 2009-2025  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,23 +13,19 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc.,  51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301 USA
-
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef IGRAPH_HRG_H
 #define IGRAPH_HRG_H
 
 #include "igraph_decls.h"
-
 #include "igraph_datatype.h"
 #include "igraph_error.h"
 #include "igraph_graph_list.h"
 #include "igraph_vector.h"
 
-__BEGIN_DECLS
+IGRAPH_BEGIN_C_DECLS
 
 /**
  * \struct igraph_hrg_t
@@ -75,14 +69,14 @@ typedef struct igraph_hrg_t {
     igraph_vector_int_t edges;
 } igraph_hrg_t;
 
-IGRAPH_EXPORT igraph_error_t igraph_hrg_init(igraph_hrg_t *hrg, igraph_integer_t n);
+IGRAPH_EXPORT igraph_error_t igraph_hrg_init(igraph_hrg_t *hrg, igraph_int_t n);
 IGRAPH_EXPORT void igraph_hrg_destroy(igraph_hrg_t *hrg);
-IGRAPH_EXPORT igraph_integer_t igraph_hrg_size(const igraph_hrg_t *hrg);
-IGRAPH_EXPORT igraph_error_t igraph_hrg_resize(igraph_hrg_t *hrg, igraph_integer_t newsize);
+IGRAPH_EXPORT igraph_int_t igraph_hrg_size(const igraph_hrg_t *hrg);
+IGRAPH_EXPORT igraph_error_t igraph_hrg_resize(igraph_hrg_t *hrg, igraph_int_t newsize);
 
 IGRAPH_EXPORT igraph_error_t igraph_hrg_fit(
     const igraph_t *graph, igraph_hrg_t *hrg, igraph_bool_t start,
-    igraph_integer_t steps
+    igraph_int_t steps
 );
 
 IGRAPH_EXPORT igraph_error_t igraph_hrg_sample(
@@ -91,7 +85,7 @@ IGRAPH_EXPORT igraph_error_t igraph_hrg_sample(
 
 IGRAPH_EXPORT igraph_error_t igraph_hrg_sample_many(
     const igraph_hrg_t *hrg, igraph_graph_list_t *samples,
-    igraph_integer_t num_samples
+    igraph_int_t num_samples
 );
 
 IGRAPH_EXPORT igraph_error_t igraph_hrg_game(
@@ -107,15 +101,15 @@ IGRAPH_EXPORT igraph_error_t igraph_hrg_consensus(const igraph_t *graph,
                                        igraph_vector_t *weights,
                                        igraph_hrg_t *hrg,
                                        igraph_bool_t start,
-                                       igraph_integer_t num_samples);
+                                       igraph_int_t num_samples);
 
 IGRAPH_EXPORT igraph_error_t igraph_hrg_predict(const igraph_t *graph,
                                      igraph_vector_int_t *edges,
                                      igraph_vector_t *prob,
                                      igraph_hrg_t *hrg,
                                      igraph_bool_t start,
-                                     igraph_integer_t num_samples,
-                                     igraph_integer_t num_bins);
+                                     igraph_int_t num_samples,
+                                     igraph_int_t num_bins);
 
 IGRAPH_EXPORT igraph_error_t igraph_hrg_create(igraph_hrg_t *hrg,
                                     const igraph_t *graph,
@@ -127,6 +121,6 @@ IGRAPH_DEPRECATED IGRAPH_EXPORT igraph_error_t igraph_hrg_dendrogram(
     igraph_t *graph, const igraph_hrg_t *hrg
 );
 
-__END_DECLS
+IGRAPH_END_C_DECLS
 
 #endif  /* IGRAPH_HRG_H */

@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2009-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -27,6 +26,9 @@ int main(void) {
 
     igraph_t graph;
     igraph_real_t cent;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     /* Create an undirected star graph, which is the most centralized graph
      * with several common centrality scores. */
@@ -57,15 +59,14 @@ int main(void) {
     /* With eigenvector centrality, the most centralized structure is
      * a graph containing a single edge. */
     printf("\ngraph with single edge:\n");
-    igraph_small(&graph, /*n=*/ 10, /*directed=*/ 0,
+    igraph_small(&graph, /*n=*/ 10, IGRAPH_UNDIRECTED,
                  0,1, -1);
 
     igraph_centralization_eigenvector_centrality(
                 &graph,
                 /*vector=*/ NULL,
                 /*value=*/ NULL,
-                IGRAPH_DIRECTED,
-                /*scale=*/ true,
+                /*mode=*/ IGRAPH_ALL,
                 /*options=*/ NULL,
                 &cent,
                 /*theoretical_max=*/ NULL,

@@ -1,7 +1,5 @@
-/* -*- mode: C -*-  */
-/* vim:set ts=4 sw=4 sts=4 et: */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2005-2020  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -45,15 +43,15 @@ static igraph_error_t igraph_i_average_path_length_unweighted(
         const igraph_bool_t invert, /* average inverse distances instead of distances */
         const igraph_bool_t unconn  /* average over connected pairs instead of all pairs */)
 {
-    const igraph_integer_t no_of_nodes = igraph_vcount(graph);
+    const igraph_int_t no_of_nodes = igraph_vcount(graph);
 
     /* The number of ordered vertex pairs.
      * While the conditional below is not mathematically necessary, it prevents
      * returning -0.0 where 0.0 would be expected. */
     const igraph_real_t no_of_pairs = no_of_nodes > 0 ? no_of_nodes * (no_of_nodes - 1.0) : 0.0;
 
-    igraph_integer_t n;
-    igraph_integer_t *already_added;
+    igraph_int_t n;
+    igraph_int_t *already_added;
 
     igraph_real_t no_of_conn_pairs = 0.0; /* no. of ordered pairs between which there is a path */
 
@@ -62,7 +60,7 @@ static igraph_error_t igraph_i_average_path_length_unweighted(
     igraph_adjlist_t allneis;
 
     *res = 0;
-    already_added = IGRAPH_CALLOC(no_of_nodes, igraph_integer_t);
+    already_added = IGRAPH_CALLOC(no_of_nodes, igraph_int_t);
     IGRAPH_CHECK_OOM(already_added, "Insufficient memory for average path length.");
     IGRAPH_FINALLY(igraph_free, already_added);
 
@@ -75,7 +73,7 @@ static igraph_error_t igraph_i_average_path_length_unweighted(
     ));
     IGRAPH_FINALLY(igraph_adjlist_destroy, &allneis);
 
-    for (igraph_integer_t source = 0; source < no_of_nodes; source++) {
+    for (igraph_int_t source = 0; source < no_of_nodes; source++) {
         IGRAPH_CHECK(igraph_dqueue_int_push(&q, source));
         IGRAPH_CHECK(igraph_dqueue_int_push(&q, 0));
         already_added[source] = source + 1;
@@ -83,13 +81,13 @@ static igraph_error_t igraph_i_average_path_length_unweighted(
         IGRAPH_ALLOW_INTERRUPTION();
 
         while (!igraph_dqueue_int_empty(&q)) {
-            igraph_integer_t actnode = igraph_dqueue_int_pop(&q);
-            igraph_integer_t actdist = igraph_dqueue_int_pop(&q);
+            igraph_int_t actnode = igraph_dqueue_int_pop(&q);
+            igraph_int_t actdist = igraph_dqueue_int_pop(&q);
 
             neis = igraph_adjlist_get(&allneis, actnode);
             n = igraph_vector_int_size(neis);
-            for (igraph_integer_t j = 0; j < n; j++) {
-                igraph_integer_t neighbor = VECTOR(*neis)[j];
+            for (igraph_int_t j = 0; j < n; j++) {
+                igraph_int_t neighbor = VECTOR(*neis)[j];
                 if (already_added[neighbor] == source + 1) {
                     continue;
                 }
@@ -142,15 +140,15 @@ static igraph_error_t igraph_i_average_path_length_unweighted(
 }
 
 
-/* Computes the average of pairwise distances (used for igraph_average_path_length_dijkstra),
- * or of inverse pairwise distances (used for igraph_global_efficiency), in an unweighted graph.
+/* Computes the average of pairwise distances (used for igraph_average_path_length),
+ * or of inverse pairwise distances (used for igraph_global_efficiency), in a weighted graph.
  * Uses Dijkstra's algorithm, therefore all weights must be non-negative.
  */
 static igraph_error_t igraph_i_average_path_length_dijkstra(
         const igraph_t *graph,
+        const igraph_vector_t *weights,
         igraph_real_t *res,
         igraph_real_t *unconnected_pairs,
-        const igraph_vector_t *weights,
         const igraph_bool_t directed,
         const igraph_bool_t invert, /* average inverse distances instead of distances */
         const igraph_bool_t unconn  /* average over connected pairs instead of all pairs */)
@@ -171,16 +169,14 @@ static igraph_error_t igraph_i_average_path_length_dijkstra(
          and we want to spare that. -1 will denote infinity instead.
     */
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t no_of_edges = igraph_ecount(graph);
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t no_of_edges = igraph_ecount(graph);
     igraph_2wheap_t Q;
     igraph_lazy_inclist_t inclist;
     igraph_real_t no_of_pairs;
     igraph_real_t no_of_conn_pairs = 0.0; /* no. of ordered pairs between which there is a path */
 
-    if (!weights) {
-        return igraph_i_average_path_length_unweighted(graph, res, unconnected_pairs, directed, invert, unconn);
-    }
+    IGRAPH_ASSERT(weights != 0);
 
     if (igraph_vector_size(weights) != no_of_edges) {
         IGRAPH_ERRORF("Weight vector length (%" IGRAPH_PRId ") does not match the number of edges (%" IGRAPH_PRId ").",
@@ -212,7 +208,7 @@ static igraph_error_t igraph_i_average_path_length_dijkstra(
 
     *res = 0.0;
 
-    for (igraph_integer_t source = 0; source < no_of_nodes; ++source) {
+    for (igraph_int_t source = 0; source < no_of_nodes; ++source) {
 
         IGRAPH_ALLOW_INTERRUPTION();
 
@@ -220,10 +216,10 @@ static igraph_error_t igraph_i_average_path_length_dijkstra(
         igraph_2wheap_push_with_index(&Q, source, -1.0);
 
         while (!igraph_2wheap_empty(&Q)) {
-            igraph_integer_t minnei = igraph_2wheap_max_index(&Q);
+            igraph_int_t minnei = igraph_2wheap_max_index(&Q);
             igraph_real_t mindist = -igraph_2wheap_deactivate_max(&Q);
             igraph_vector_int_t *neis;
-            igraph_integer_t nlen;
+            igraph_int_t nlen;
 
             if (minnei != source) {
                 if (invert) {
@@ -238,9 +234,9 @@ static igraph_error_t igraph_i_average_path_length_dijkstra(
             neis = igraph_lazy_inclist_get(&inclist, minnei);
             IGRAPH_CHECK_OOM(neis, "Failed to query incident edges.");
             nlen = igraph_vector_int_size(neis);
-            for (igraph_integer_t j = 0; j < nlen; j++) {
-                igraph_integer_t edge = VECTOR(*neis)[j];
-                igraph_integer_t tto = IGRAPH_OTHER(graph, edge, minnei);
+            for (igraph_int_t j = 0; j < nlen; j++) {
+                igraph_int_t edge = VECTOR(*neis)[j];
+                igraph_int_t tto = IGRAPH_OTHER(graph, edge, minnei);
                 igraph_real_t altdist = mindist + VECTOR(*weights)[edge];
                 igraph_bool_t active = igraph_2wheap_has_active(&Q, tto);
                 igraph_bool_t has = igraph_2wheap_has_elem(&Q, tto);
@@ -292,45 +288,7 @@ static igraph_error_t igraph_i_average_path_length_dijkstra(
 /**
  * \ingroup structural
  * \function igraph_average_path_length
- * \brief The average unweighted shortest path length between all vertex pairs.
- *
- * If no vertex pairs can be included in the calculation, for example because
- * the graph has fewer than two vertices, or if the graph has no edges and
- * \p unconn is set to \c true, NaN is returned.
- *
- * \param graph The graph object.
- * \param res Pointer to a real number, this will contain the result.
- * \param unconn_pairs Pointer to a real number. If not a null pointer, the
- *    number of ordered vertex pairs where the second vertex is unreachable
- *    from the first one will be stored here.
- * \param directed Boolean, whether to consider directed
- *    paths. Ignored for undirected graphs.
- * \param unconn What to do if the graph is not connected. If
- *    \c true, only those vertex pairs will be included in the calculation
- *    between which there is a path. If \c false, \c IGRAPH_INFINITY is returned
- *    for disconnected graphs.
- * \return Error code:
- *         \c IGRAPH_ENOMEM, not enough memory for data structures
- *
- * Time complexity: O(|V| |E|), the number of vertices times the number of edges.
- *
- * \sa \ref igraph_average_path_length_dijkstra() for the weighted version.
- *
- * \example examples/simple/igraph_average_path_length.c
- */
-
-igraph_error_t igraph_average_path_length(const igraph_t *graph,
-                               igraph_real_t *res, igraph_real_t *unconn_pairs,
-                               igraph_bool_t directed, igraph_bool_t unconn)
-{
-    return igraph_i_average_path_length_unweighted(graph, res, unconn_pairs, directed, /* invert= */ 0, unconn);
-}
-
-
-/**
- * \ingroup structural
- * \function igraph_average_path_length_dijkstra
- * \brief The average weighted shortest path length between all vertex pairs.
+ * \brief The average shortest path length between all vertex pairs.
  *
  * If no vertex pairs can be included in the calculation, for example because the graph
  * has fewer than two vertices, or if the graph has no edges and \c unconn is set to \c true,
@@ -340,16 +298,15 @@ igraph_error_t igraph_average_path_length(const igraph_t *graph,
  * All distinct ordered vertex pairs are taken into account.
  *
  * \param graph The graph object.
+ * \param weights The edge weights. All edge weights must be
+ *       non-negative for Dijkstra's algorithm to work. Additionally, no
+ *       edge weight may be NaN. If either case does not hold, an error
+ *       is returned. Passa a null pointer here if the graph is unweighted.
+ *       Edges with positive infinite weight are ignored.
  * \param res Pointer to a real number, this will contain the result.
  * \param unconn_pairs Pointer to a real number. If not a null pointer, the number of
  *    ordered vertex pairs where the second vertex is unreachable from the first one
  *    will be stored here.
- * \param weights The edge weights. All edge weights must be
- *       non-negative for Dijkstra's algorithm to work. Additionally, no
- *       edge weight may be NaN. If either case does not hold, an error
- *       is returned. If this is a null pointer, then the unweighted
- *       version, \ref igraph_average_path_length() is called. Edges with positive
- *       infinite weight are ignored.
  * \param directed Boolean, whether to consider directed paths.
  *    Ignored for undirected graphs.
  * \param unconn If \c true, only those pairs are considered for the calculation
@@ -366,17 +323,22 @@ igraph_error_t igraph_average_path_length(const igraph_t *graph,
  * Time complexity: O(|V| |E| log|E| + |V|), where |V| is the number of
  * vertices and |E| is the number of edges.
  *
- * \sa \ref igraph_average_path_length() for a slightly faster unweighted version.
- *
  * \example examples/simple/igraph_grg_game.c
  */
 
-igraph_error_t igraph_average_path_length_dijkstra(const igraph_t *graph,
-                                        igraph_real_t *res, igraph_real_t *unconn_pairs,
-                                        const igraph_vector_t *weights,
-                                        igraph_bool_t directed, igraph_bool_t unconn)
-{
-    return igraph_i_average_path_length_dijkstra(graph, res, unconn_pairs, weights, directed, /* invert= */ false, unconn);
+igraph_error_t igraph_average_path_length(
+    const igraph_t *graph, const igraph_vector_t *weights, igraph_real_t *res,
+    igraph_real_t *unconn_pairs, igraph_bool_t directed, igraph_bool_t unconn
+) {
+    if (weights) {
+        return igraph_i_average_path_length_dijkstra(
+            graph, weights, res, unconn_pairs, directed, /* invert= */ false, unconn
+        );
+    } else {
+        return igraph_i_average_path_length_unweighted(
+            graph, res, unconn_pairs, directed, /* invert = */ false, unconn
+        );
+    }
 }
 
 
@@ -402,7 +364,6 @@ igraph_error_t igraph_average_path_length_dijkstra(const igraph_t *graph,
  * https://dx.doi.org/10.1103/PhysRevLett.87.198701
  *
  * \param graph The graph object.
- * \param res Pointer to a real number, this will contain the result.
  * \param weights The edge weights. All edge weights must be
  *       non-negative for Dijkstra's algorithm to work. Additionally, no
  *       edge weight may be NaN. If either case does not hold, an error
@@ -410,6 +371,7 @@ igraph_error_t igraph_average_path_length_dijkstra(const igraph_t *graph,
  *       version, \ref igraph_average_path_length() is used in calculating
  *       the global efficiency. Edges with positive infinite weights are
  *       ignored.
+ * \param res Pointer to a real number, this will contain the result.
  * \param directed Boolean, whether to consider directed paths.
  *    Ignored for undirected graphs.
  * \return Error code:
@@ -427,11 +389,19 @@ igraph_error_t igraph_average_path_length_dijkstra(const igraph_t *graph,
  * \sa \ref igraph_local_efficiency(), \ref igraph_average_local_efficiency()
  */
 
-igraph_error_t igraph_global_efficiency(const igraph_t *graph, igraph_real_t *res,
-                             const igraph_vector_t *weights,
-                             igraph_bool_t directed)
-{
-    return igraph_i_average_path_length_dijkstra(graph, res, NULL, weights, directed, /* invert= */ true, /* unconn= */ false);
+igraph_error_t igraph_global_efficiency(
+    const igraph_t *graph, const igraph_vector_t *weights,
+    igraph_real_t *res, igraph_bool_t directed
+) {
+    if (weights) {
+        return igraph_i_average_path_length_dijkstra(
+            graph, weights, res, NULL, directed, /* invert= */ true, /* unconn= */ false
+        );
+    } else {
+        return igraph_i_average_path_length_unweighted(
+            graph, res, NULL, directed, /* invert= */ true, /* unconn= */ false
+        );
+    }
 }
 
 
@@ -443,17 +413,17 @@ static igraph_error_t igraph_i_local_efficiency_unweighted(
         const igraph_t *graph,
         const igraph_adjlist_t *adjlist,
         igraph_dqueue_int_t *q,
-        igraph_integer_t *already_counted,
+        igraph_int_t *already_counted,
         igraph_vector_int_t *vertex_neis,
         igraph_vector_char_t *nei_mask,
         igraph_real_t *res,
-        igraph_integer_t vertex,
+        igraph_int_t vertex,
         igraph_neimode_t mode)
 {
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t vertex_neis_size;
-    igraph_integer_t neighbor_count; /* unlike 'vertex_neis_size', 'neighbor_count' does not count self-loops and multi-edges */
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t vertex_neis_size;
+    igraph_int_t neighbor_count; /* unlike 'vertex_neis_size', 'neighbor_count' does not count self-loops and multi-edges */
 
     igraph_dqueue_int_clear(q);
 
@@ -462,13 +432,13 @@ static igraph_error_t igraph_i_local_efficiency_unweighted(
      * from, plus 1 */
     memset(already_counted, 0, no_of_nodes * sizeof(already_counted[0]));
 
-    IGRAPH_CHECK(igraph_neighbors(graph, vertex_neis, vertex, mode));
+    IGRAPH_CHECK(igraph_neighbors(graph, vertex_neis, vertex, mode, IGRAPH_LOOPS, IGRAPH_MULTIPLE));
     vertex_neis_size = igraph_vector_int_size(vertex_neis);
 
     igraph_vector_char_null(nei_mask);
     neighbor_count = 0;
-    for (igraph_integer_t i=0; i < vertex_neis_size; ++i) {
-        igraph_integer_t v = VECTOR(*vertex_neis)[i];
+    for (igraph_int_t i=0; i < vertex_neis_size; ++i) {
+        igraph_int_t v = VECTOR(*vertex_neis)[i];
         if (v != vertex && ! VECTOR(*nei_mask)[v]) {
             VECTOR(*nei_mask)[v] = 1; /* mark as unprocessed neighbour */
             neighbor_count++;
@@ -482,9 +452,9 @@ static igraph_error_t igraph_i_local_efficiency_unweighted(
         return IGRAPH_SUCCESS;
     }
 
-    for (igraph_integer_t i=0; i < vertex_neis_size; ++i) {
-        igraph_integer_t source = VECTOR(*vertex_neis)[i];
-        igraph_integer_t reached = 0;
+    for (igraph_int_t i=0; i < vertex_neis_size; ++i) {
+        igraph_int_t source = VECTOR(*vertex_neis)[i];
+        igraph_int_t reached = 0;
 
         IGRAPH_ALLOW_INTERRUPTION();
 
@@ -502,9 +472,9 @@ static igraph_error_t igraph_i_local_efficiency_unweighted(
 
         while (!igraph_dqueue_int_empty(q)) {
             igraph_vector_int_t *act_neis;
-            igraph_integer_t act_neis_size;
-            igraph_integer_t act = igraph_dqueue_int_pop(q);
-            igraph_integer_t actdist = igraph_dqueue_int_pop(q);
+            igraph_int_t act_neis_size;
+            igraph_int_t act = igraph_dqueue_int_pop(q);
+            igraph_int_t actdist = igraph_dqueue_int_pop(q);
 
             if (act != source && VECTOR(*nei_mask)[act]) {
                 *res += 1.0 / actdist;
@@ -517,8 +487,8 @@ static igraph_error_t igraph_i_local_efficiency_unweighted(
 
             act_neis      = igraph_adjlist_get(adjlist, act);
             act_neis_size = igraph_vector_int_size(act_neis);
-            for (igraph_integer_t j = 0; j < act_neis_size; j++) {
-                igraph_integer_t neighbor = VECTOR(*act_neis)[j];
+            for (igraph_int_t j = 0; j < act_neis_size; j++) {
+                igraph_int_t neighbor = VECTOR(*act_neis)[j];
 
                 if (neighbor == vertex || already_counted[neighbor] == i + 1)
                     continue;
@@ -542,7 +512,7 @@ static igraph_error_t igraph_i_local_efficiency_dijkstra(
         igraph_vector_int_t *vertex_neis,
         igraph_vector_char_t *nei_mask, /* true if the corresponding node is a neighbour of 'vertex' */
         igraph_real_t *res,
-        igraph_integer_t vertex,
+        igraph_int_t vertex,
         igraph_neimode_t mode,
         const igraph_vector_t *weights)
 {
@@ -562,16 +532,16 @@ static igraph_error_t igraph_i_local_efficiency_dijkstra(
          and we want to spare that. -1 will denote infinity instead.
     */
 
-    igraph_integer_t vertex_neis_size;
-    igraph_integer_t neighbor_count; /* unlike 'inc_edges_size', 'neighbor_count' does not count self-loops or multi-edges */
+    igraph_int_t vertex_neis_size;
+    igraph_int_t neighbor_count; /* unlike 'inc_edges_size', 'neighbor_count' does not count self-loops or multi-edges */
 
-    IGRAPH_CHECK(igraph_neighbors(graph, vertex_neis, vertex, mode));
+    IGRAPH_CHECK(igraph_neighbors(graph, vertex_neis, vertex, mode, IGRAPH_LOOPS, IGRAPH_MULTIPLE));
     vertex_neis_size = igraph_vector_int_size(vertex_neis);
 
     igraph_vector_char_null(nei_mask);
     neighbor_count = 0;
-    for (igraph_integer_t i=0; i < vertex_neis_size; ++i) {
-        igraph_integer_t v = VECTOR(*vertex_neis)[i];
+    for (igraph_int_t i=0; i < vertex_neis_size; ++i) {
+        igraph_int_t v = VECTOR(*vertex_neis)[i];
         if (v != vertex && ! VECTOR(*nei_mask)[v]) {
             VECTOR(*nei_mask)[v] = 1; /* mark as unprocessed neighbour */
             neighbor_count++;
@@ -585,9 +555,9 @@ static igraph_error_t igraph_i_local_efficiency_dijkstra(
         return IGRAPH_SUCCESS;
     }
 
-    for (igraph_integer_t i=0; i < vertex_neis_size; ++i) {
-        igraph_integer_t source = VECTOR(*vertex_neis)[i];
-        igraph_integer_t reached = 0;
+    for (igraph_int_t i=0; i < vertex_neis_size; ++i) {
+        igraph_int_t source = VECTOR(*vertex_neis)[i];
+        igraph_int_t reached = 0;
 
         IGRAPH_ALLOW_INTERRUPTION();
 
@@ -603,10 +573,10 @@ static igraph_error_t igraph_i_local_efficiency_dijkstra(
         igraph_2wheap_push_with_index(Q, source, -1.0);
 
         while (!igraph_2wheap_empty(Q)) {
-            igraph_integer_t minnei = igraph_2wheap_max_index(Q);
+            igraph_int_t minnei = igraph_2wheap_max_index(Q);
             igraph_real_t mindist = -igraph_2wheap_deactivate_max(Q);
             igraph_vector_int_t *neis;
-            igraph_integer_t nlen;
+            igraph_int_t nlen;
 
             if (minnei != source && VECTOR(*nei_mask)[minnei]) {
                 *res += 1.0/(mindist - 1.0);
@@ -621,11 +591,11 @@ static igraph_error_t igraph_i_local_efficiency_dijkstra(
             neis = igraph_lazy_inclist_get(inclist, minnei);
             IGRAPH_CHECK_OOM(neis, "Failed to query incident edges.");
             nlen = igraph_vector_int_size(neis);
-            for (igraph_integer_t j = 0; j < nlen; j++) {
+            for (igraph_int_t j = 0; j < nlen; j++) {
                 igraph_real_t altdist, curdist;
                 igraph_bool_t active, has;
-                igraph_integer_t edge = VECTOR(*neis)[j];
-                igraph_integer_t tto = IGRAPH_OTHER(graph, edge, minnei);
+                igraph_int_t edge = VECTOR(*neis)[j];
+                igraph_int_t tto = IGRAPH_OTHER(graph, edge, minnei);
 
                 if (tto == vertex) {
                     continue;
@@ -679,14 +649,14 @@ static igraph_error_t igraph_i_local_efficiency_dijkstra(
  * http://dx.doi.org/10.1103/PhysRevE.71.036122
  *
  * \param graph The graph object.
- * \param res Pointer to an initialized vector, this will contain the result.
- * \param vids The vertices around which the local efficiency will be calculated.
  * \param weights The edge weights. All edge weights must be
  *       non-negative. Additionally, no edge weight may be NaN. If either
  *       case does not hold, an error is returned. If this is a null
  *       pointer, then the unweighted version,
  *       \ref igraph_average_path_length() is called. Edges with positive
  *       infinite weights are ignored.
+ * \param res Pointer to an initialized vector, this will contain the result.
+ * \param vids The vertices around which the local efficiency will be calculated.
  * \param directed Boolean, whether to consider directed paths.
  *    Ignored for undirected graphs.
  * \param mode How to determine the local neighborhood of each vertex
@@ -715,18 +685,17 @@ static igraph_error_t igraph_i_local_efficiency_dijkstra(
  *
  */
 
-igraph_error_t igraph_local_efficiency(const igraph_t *graph, igraph_vector_t *res,
-                            const igraph_vs_t vids,
-                            const igraph_vector_t *weights,
-                            igraph_bool_t directed, igraph_neimode_t mode)
-{
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t no_of_edges = igraph_ecount(graph);
-    igraph_integer_t nodes_to_calc; /* no. of vertices includes in computation */
+igraph_error_t igraph_local_efficiency(
+    const igraph_t *graph, const igraph_vector_t *weights, igraph_vector_t *res,
+    const igraph_vs_t vids, igraph_bool_t directed, igraph_neimode_t mode
+) {
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t no_of_edges = igraph_ecount(graph);
+    igraph_int_t nodes_to_calc; /* no. of vertices includes in computation */
     igraph_vit_t vit;
     igraph_vector_int_t vertex_neis;
     igraph_vector_char_t nei_mask;
-    igraph_integer_t i;
+    igraph_int_t i;
 
     /* 'nei_mask' is a vector indexed by vertices. The meaning of its values is as follows:
      *   0: not a neighbour of 'vertex'
@@ -749,11 +718,11 @@ igraph_error_t igraph_local_efficiency(const igraph_t *graph, igraph_vector_t *r
 
     if (! weights) /* unweighted case */
     {
-        igraph_integer_t *already_counted;
+        igraph_int_t *already_counted;
         igraph_adjlist_t adjlist;
         igraph_dqueue_int_t q = IGRAPH_DQUEUE_NULL;
 
-        already_counted = IGRAPH_CALLOC(no_of_nodes, igraph_integer_t);
+        already_counted = IGRAPH_CALLOC(no_of_nodes, igraph_int_t);
         IGRAPH_CHECK_OOM(already_counted, "Insufficient memory for local efficiency calculation.");
         IGRAPH_FINALLY(igraph_free, already_counted);
 
@@ -838,10 +807,10 @@ igraph_error_t igraph_local_efficiency(const igraph_t *graph, igraph_vector_t *r
  * For the null graph, zero is returned by convention.
  *
  * \param graph The graph object.
- * \param res Pointer to a real number, this will contain the result.
  * \param weights The edge weights. They must be all non-negative.
  *    If a null pointer is given, all weights are assumed to be 1. Edges
  *    with positive infinite weight are ignored.
+ * \param res Pointer to a real number, this will contain the result.
  * \param directed Boolean, whether to consider directed paths.
  *    Ignored for undirected graphs.
  * \param mode How to determine the local neighborhood of each vertex
@@ -870,11 +839,11 @@ igraph_error_t igraph_local_efficiency(const igraph_t *graph, igraph_vector_t *r
  *
  */
 
-igraph_error_t igraph_average_local_efficiency(const igraph_t *graph, igraph_real_t *res,
-                                    const igraph_vector_t *weights,
-                                    igraph_bool_t directed, igraph_neimode_t mode)
-{
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
+igraph_error_t igraph_average_local_efficiency(
+    const igraph_t *graph, const igraph_vector_t *weights, igraph_real_t *res,
+    igraph_bool_t directed, igraph_neimode_t mode
+) {
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
     igraph_vector_t local_eff;
 
     /* If there are fewer than 3 vertices, no vertex has more than one neighbour, thus all
@@ -886,7 +855,7 @@ igraph_error_t igraph_average_local_efficiency(const igraph_t *graph, igraph_rea
 
     IGRAPH_VECTOR_INIT_FINALLY(&local_eff, no_of_nodes);
 
-    IGRAPH_CHECK(igraph_local_efficiency(graph, &local_eff, igraph_vss_all(), weights, directed, mode));
+    IGRAPH_CHECK(igraph_local_efficiency(graph, weights, &local_eff, igraph_vss_all(),directed, mode));
 
     *res = igraph_vector_sum(&local_eff);
     *res /= no_of_nodes;
@@ -941,24 +910,24 @@ igraph_error_t igraph_average_local_efficiency(const igraph_t *graph, igraph_rea
  * Time complexity: O(|V||E|), the
  * number of vertices times the number of edges.
  *
- * \sa \ref igraph_diameter_dijkstra() for the weighted version,
- * \ref igraph_radius() for the minimum eccentricity.
+ * \sa \ref igraph_radius() for the minimum eccentricity.
  *
  * \example examples/simple/igraph_diameter.c
  */
 
-igraph_error_t igraph_diameter(const igraph_t *graph, igraph_real_t *res,
-                    igraph_integer_t *from, igraph_integer_t *to,
-                    igraph_vector_int_t *vertex_path, igraph_vector_int_t *edge_path,
-                    igraph_bool_t directed, igraph_bool_t unconn) {
+static igraph_error_t igraph_i_diameter_unweighted(
+    const igraph_t *graph, igraph_real_t *res, igraph_int_t *from,
+    igraph_int_t *to, igraph_vector_int_t *vertex_path,
+    igraph_vector_int_t *edge_path, igraph_bool_t directed, igraph_bool_t unconn
+) {
 
-    const igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t n;
-    igraph_integer_t *already_added;
-    igraph_integer_t nodes_reached;
+    const igraph_int_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t n;
+    igraph_int_t *already_added;
+    igraph_int_t nodes_reached;
     /* from/to are initialized to 0 because in a singleton graph, or in an edgeless graph
      * with unconn = true, the diameter path will be considered to consist of vertex 0 only. */
-    igraph_integer_t ifrom = 0, ito = 0;
+    igraph_int_t ifrom = 0, ito = 0;
     igraph_real_t ires = 0;
 
     igraph_dqueue_int_t q = IGRAPH_DQUEUE_NULL;
@@ -992,7 +961,7 @@ igraph_error_t igraph_diameter(const igraph_t *graph, igraph_real_t *res,
     } else {
         dirmode = IGRAPH_ALL;
     }
-    already_added = IGRAPH_CALLOC(no_of_nodes, igraph_integer_t);
+    already_added = IGRAPH_CALLOC(no_of_nodes, igraph_int_t);
     IGRAPH_CHECK_OOM(already_added, "Insufficient memory for diameter calculation.");
     IGRAPH_FINALLY(igraph_free, already_added);
 
@@ -1001,7 +970,7 @@ igraph_error_t igraph_diameter(const igraph_t *graph, igraph_real_t *res,
     IGRAPH_CHECK(igraph_adjlist_init(graph, &allneis, dirmode, IGRAPH_LOOPS, IGRAPH_MULTIPLE));
     IGRAPH_FINALLY(igraph_adjlist_destroy, &allneis);
 
-    for (igraph_integer_t i = 0; i < no_of_nodes; i++) {
+    for (igraph_int_t i = 0; i < no_of_nodes; i++) {
         nodes_reached = 1;
         IGRAPH_CHECK(igraph_dqueue_int_push(&q, i));
         IGRAPH_CHECK(igraph_dqueue_int_push(&q, 0));
@@ -1012,8 +981,8 @@ igraph_error_t igraph_diameter(const igraph_t *graph, igraph_real_t *res,
         IGRAPH_ALLOW_INTERRUPTION();
 
         while (!igraph_dqueue_int_empty(&q)) {
-            igraph_integer_t actnode = igraph_dqueue_int_pop(&q);
-            igraph_integer_t actdist = igraph_dqueue_int_pop(&q);
+            igraph_int_t actnode = igraph_dqueue_int_pop(&q);
+            igraph_int_t actdist = igraph_dqueue_int_pop(&q);
             if (actdist > ires) {
                 ires = actdist;
                 ifrom = i;
@@ -1022,8 +991,8 @@ igraph_error_t igraph_diameter(const igraph_t *graph, igraph_real_t *res,
 
             neis = igraph_adjlist_get(&allneis, actnode);
             n = igraph_vector_int_size(neis);
-            for (igraph_integer_t j = 0; j < n; j++) {
-                igraph_integer_t neighbor = VECTOR(*neis)[j];
+            for (igraph_int_t j = 0; j < n; j++) {
+                igraph_int_t neighbor = VECTOR(*neis)[j];
                 if (already_added[neighbor] == i + 1) {
                     continue;
                 }
@@ -1064,7 +1033,7 @@ igraph_error_t igraph_diameter(const igraph_t *graph, igraph_real_t *res,
                 igraph_vector_int_clear(edge_path);
             }
         } else {
-            IGRAPH_CHECK(igraph_get_shortest_path(graph, vertex_path, edge_path,
+            IGRAPH_CHECK(igraph_get_shortest_path(graph, NULL, vertex_path, edge_path,
                                                   ifrom, ito, dirmode));
         }
     }
@@ -1078,61 +1047,11 @@ igraph_error_t igraph_diameter(const igraph_t *graph, igraph_real_t *res,
     return IGRAPH_SUCCESS;
 }
 
-/**
- * \function igraph_diameter_dijkstra
- * \brief Calculates the weighted diameter of a graph using Dijkstra's algorithm.
- *
- * This function computes the weighted diameter of a graph, defined as the longest
- * weighted shortest path, or the maximum weighted eccentricity of the graph's
- * vertices. A corresponding shortest path, as well as its endpoints,
- * can also be optionally computed.
- *
- * </para><para>
- * If the graph has no vertices, \c IGRAPH_NAN is returned.
- *
- * \param graph The input graph, can be directed or undirected.
- * \param weights The edge weights of the graph. Can be \c NULL for an
- *        unweighted graph. Edges with positive infinite weight are ignored.
- * \param res Pointer to a real number, if not \c NULL then it will contain
- *        the diameter (the actual distance).
- * \param from Pointer to an integer, if not \c NULL it will be set to the
- *        source vertex of the diameter path. If the graph has no diameter path,
- *        it will be set to -1.
- * \param to Pointer to an integer, if not \c NULL it will be set to the
- *        target vertex of the diameter path. If the graph has no diameter path,
- *        it will be set to -1.
- * \param vertex_path Pointer to an initialized vector. If not \c NULL the actual
- *        longest geodesic path in terms of vertices will be stored here. The vector will be
- *        resized as needed.
- * \param edge_path Pointer to an initialized vector. If not \c NULL the actual
- *        longest geodesic path in terms of edges will be stored here. The vector will be
- *        resized as needed.
- * \param directed Boolean, whether to consider directed
- *        paths. Ignored for undirected graphs.
- * \param unconn What to do if the graph is not connected. If
- *        \c true the longest geodesic within a component
- *        will be returned, otherwise \c IGRAPH_INFINITY is
- *        returned.
- * \return Error code.
- *
- * Time complexity: O(|V||E|*log|E|), |V| is the number of vertices,
- * |E| is the number of edges.
- *
- * \sa \ref igraph_diameter() for the unweighted version,
- * \ref igraph_radius_dijkstra() for the minimum weighted eccentricity.
- */
-
-
-igraph_error_t igraph_diameter_dijkstra(const igraph_t *graph,
-                             const igraph_vector_t *weights,
-                             igraph_real_t *res,
-                             igraph_integer_t *from,
-                             igraph_integer_t *to,
-                             igraph_vector_int_t *vertex_path,
-                             igraph_vector_int_t *edge_path,
-                             igraph_bool_t directed,
-                             igraph_bool_t unconn) {
-
+static igraph_error_t igraph_i_diameter_dijkstra(
+    const igraph_t *graph, const igraph_vector_t *weights, igraph_real_t *res,
+    igraph_int_t *from, igraph_int_t *to, igraph_vector_int_t *vertex_path,
+    igraph_vector_int_t *edge_path, igraph_bool_t directed, igraph_bool_t unconn
+) {
     /* Implementation details. This is the basic Dijkstra algorithm,
        with a binary heap. The heap is indexed, i.e. it stores not only
        the distances, but also which vertex they belong to.
@@ -1148,8 +1067,8 @@ igraph_error_t igraph_diameter_dijkstra(const igraph_t *graph,
          infinity instead.
     */
 
-    const igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    const igraph_integer_t no_of_edges = igraph_ecount(graph);
+    const igraph_int_t no_of_nodes = igraph_vcount(graph);
+    const igraph_int_t no_of_edges = igraph_ecount(graph);
 
     igraph_2wheap_t Q;
     igraph_inclist_t inclist;
@@ -1157,9 +1076,9 @@ igraph_error_t igraph_diameter_dijkstra(const igraph_t *graph,
 
     /* from/to are initialized to 0 because in a singleton graph, or in an edgeless graph
      * with unconn = true, the diameter path will be considered to consist of vertex 0 only. */
-    igraph_integer_t ifrom = 0, ito = 0;
+    igraph_int_t ifrom = 0, ito = 0;
     igraph_real_t ires = 0;
-    igraph_integer_t nodes_reached = 0;
+    igraph_int_t nodes_reached = 0;
 
     /* See https://github.com/igraph/igraph/issues/1538#issuecomment-724071857
      * for why we return NaN for the null graph. */
@@ -1182,16 +1101,9 @@ igraph_error_t igraph_diameter_dijkstra(const igraph_t *graph,
         return IGRAPH_SUCCESS;
     }
 
-    if (!weights) {
-        igraph_real_t diameter;
-        IGRAPH_CHECK(igraph_diameter(graph, &diameter, from, to, vertex_path, edge_path, directed, unconn));
-        if (res) {
-            *res = diameter;
-        }
-        return IGRAPH_SUCCESS;
-    }
+    IGRAPH_ASSERT(weights != 0);
 
-    if (weights && igraph_vector_size(weights) != no_of_edges) {
+    if (igraph_vector_size(weights) != no_of_edges) {
         IGRAPH_ERRORF("Weight vector length (%" IGRAPH_PRId ") not equal to number of edges (%" IGRAPH_PRId ").",
                       IGRAPH_EINVAL, igraph_vector_size(weights), no_of_edges);
     }
@@ -1211,7 +1123,7 @@ igraph_error_t igraph_diameter_dijkstra(const igraph_t *graph,
     IGRAPH_CHECK(igraph_inclist_init(graph, &inclist, dirmode, IGRAPH_LOOPS));
     IGRAPH_FINALLY(igraph_inclist_destroy, &inclist);
 
-    for (igraph_integer_t source = 0; source < no_of_nodes; source++) {
+    for (igraph_int_t source = 0; source < no_of_nodes; source++) {
 
         IGRAPH_PROGRESS("Weighted diameter: ", source * 100.0 / no_of_nodes, NULL);
         IGRAPH_ALLOW_INTERRUPTION();
@@ -1222,10 +1134,10 @@ igraph_error_t igraph_diameter_dijkstra(const igraph_t *graph,
         nodes_reached = 0.0;
 
         while (!igraph_2wheap_empty(&Q)) {
-            igraph_integer_t minnei = igraph_2wheap_max_index(&Q);
+            igraph_int_t minnei = igraph_2wheap_max_index(&Q);
             igraph_real_t mindist = -igraph_2wheap_deactivate_max(&Q);
             igraph_vector_int_t *neis;
-            igraph_integer_t nlen;
+            igraph_int_t nlen;
 
             if (mindist > ires) {
                 ires = mindist; ifrom = source; ito = minnei;
@@ -1235,9 +1147,9 @@ igraph_error_t igraph_diameter_dijkstra(const igraph_t *graph,
             /* Now check all neighbors of 'minnei' for a shorter path */
             neis = igraph_inclist_get(&inclist, minnei);
             nlen = igraph_vector_int_size(neis);
-            for (igraph_integer_t j = 0; j < nlen; j++) {
-                igraph_integer_t edge = VECTOR(*neis)[j];
-                igraph_integer_t tto = IGRAPH_OTHER(graph, edge, minnei);
+            for (igraph_int_t j = 0; j < nlen; j++) {
+                igraph_int_t edge = VECTOR(*neis)[j];
+                igraph_int_t tto = IGRAPH_OTHER(graph, edge, minnei);
                 igraph_real_t altdist = mindist + VECTOR(*weights)[edge];
                 igraph_bool_t active = igraph_2wheap_has_active(&Q, tto);
                 igraph_bool_t has = igraph_2wheap_has_elem(&Q, tto);
@@ -1296,7 +1208,70 @@ igraph_error_t igraph_diameter_dijkstra(const igraph_t *graph,
                             weights, dirmode));
         }
     }
+
     return IGRAPH_SUCCESS;
+}
+
+/**
+ * \function igraph_diameter
+ * \brief Calculates the weighted diameter of a graph using Dijkstra's algorithm.
+ *
+ * This function computes the weighted diameter of a graph, defined as the longest
+ * weighted shortest path, or the maximum weighted eccentricity of the graph's
+ * vertices. A corresponding shortest path, as well as its endpoints,
+ * can also be optionally computed.
+ *
+ * </para><para>
+ * If the graph has no vertices, \c IGRAPH_NAN is returned.
+ *
+ * \param graph The input graph, can be directed or undirected.
+ * \param weights The edge weights of the graph. Can be \c NULL for an
+ *        unweighted graph. Edges with positive infinite weight are ignored.
+ * \param res Pointer to a real number, if not \c NULL then it will contain
+ *        the diameter (the actual distance).
+ * \param from Pointer to an integer, if not \c NULL it will be set to the
+ *        source vertex of the diameter path. If the graph has no diameter path,
+ *        it will be set to -1.
+ * \param to Pointer to an integer, if not \c NULL it will be set to the
+ *        target vertex of the diameter path. If the graph has no diameter path,
+ *        it will be set to -1.
+ * \param vertex_path Pointer to an initialized vector. If not \c NULL the actual
+ *        longest geodesic path in terms of vertices will be stored here. The vector will be
+ *        resized as needed.
+ * \param edge_path Pointer to an initialized vector. If not \c NULL the actual
+ *        longest geodesic path in terms of edges will be stored here. The vector will be
+ *        resized as needed.
+ * \param directed Boolean, whether to consider directed
+ *        paths. Ignored for undirected graphs.
+ * \param unconn What to do if the graph is not connected. If
+ *        \c true the longest geodesic within a component
+ *        will be returned, otherwise \c IGRAPH_INFINITY is
+ *        returned.
+ * \return Error code.
+ *
+ * Time complexity: O(|V||E|*log|E|), |V| is the number of vertices,
+ * |E| is the number of edges.
+ *
+ * \sa \ref igraph_radius() for the minimum eccentricity.
+ *
+ * \example examples/simple/igraph_diameter.c
+ */
+igraph_error_t igraph_diameter(
+    const igraph_t *graph, const igraph_vector_t *weights, igraph_real_t *res,
+    igraph_int_t *from, igraph_int_t *to, igraph_vector_int_t *vertex_path,
+    igraph_vector_int_t *edge_path, igraph_bool_t directed, igraph_bool_t unconn
+) {
+    if (weights) {
+        return igraph_i_diameter_dijkstra(
+            graph, weights, res, from, to, vertex_path, edge_path,
+            directed, unconn
+        );
+    } else {
+        return igraph_i_diameter_unweighted(
+            graph, res, from, to, vertex_path, edge_path,
+            directed, unconn
+        );
+    }
 }
 
 /**
@@ -1313,14 +1288,14 @@ igraph_error_t igraph_diameter_dijkstra(const igraph_t *graph,
  */
 static igraph_error_t igraph_i_semidelete_vertex(
     const igraph_t *graph, igraph_vector_t *weights,
-    igraph_integer_t vid, igraph_vector_int_t *edges_removed,
+    igraph_int_t vid, igraph_vector_int_t *edges_removed,
     igraph_vector_int_t *eids
 ) {
-    IGRAPH_CHECK(igraph_incident(graph, eids, vid, IGRAPH_ALL));
+    IGRAPH_CHECK(igraph_incident(graph, eids, vid, IGRAPH_ALL, IGRAPH_LOOPS));
 
-    const igraph_integer_t n = igraph_vector_int_size(eids);
-    for (igraph_integer_t j = 0; j < n; j++) {
-        const igraph_integer_t eid = VECTOR(*eids)[j];
+    const igraph_int_t n = igraph_vector_int_size(eids);
+    for (igraph_int_t j = 0; j < n; j++) {
+        const igraph_int_t eid = VECTOR(*eids)[j];
         IGRAPH_CHECK(igraph_vector_int_push_back(edges_removed, eid));
         VECTOR(*weights)[eid] = IGRAPH_INFINITY;
     }
@@ -1331,9 +1306,9 @@ static igraph_error_t igraph_i_semidelete_vertex(
 static igraph_bool_t igraph_i_has_edge_with_infinite_weight(
     const igraph_vector_int_t* path, const igraph_vector_t* weights
 ) {
-    const igraph_integer_t n = weights ? igraph_vector_int_size(path) : 0;
-    for (igraph_integer_t i = 0; i < n; i++) {
-        const igraph_integer_t edge = VECTOR(*path)[i];
+    const igraph_int_t n = weights ? igraph_vector_int_size(path) : 0;
+    for (igraph_int_t i = 0; i < n; i++) {
+        const igraph_int_t edge = VECTOR(*path)[i];
         if (!isfinite(VECTOR(*weights)[edge])) {
             return true;
         }
@@ -1345,13 +1320,13 @@ static igraph_bool_t igraph_i_has_edge_with_infinite_weight(
 static igraph_real_t igraph_i_get_total_weight_of_path(
     igraph_vector_int_t* path, const igraph_vector_t* weights
 ) {
-    const igraph_integer_t n = igraph_vector_int_size(path);
+    const igraph_int_t n = igraph_vector_int_size(path);
     igraph_real_t result;
 
     if (weights) {
         result = 0;
-        for (igraph_integer_t i = 0; i < n; i++) {
-            igraph_integer_t edge = VECTOR(*path)[i];
+        for (igraph_int_t i = 0; i < n; i++) {
+            igraph_int_t edge = VECTOR(*path)[i];
             result += VECTOR(*weights)[edge];
         }
     } else {
@@ -1428,22 +1403,22 @@ igraph_error_t igraph_get_k_shortest_paths(
     const igraph_t *graph, const igraph_vector_t *weights,
     igraph_vector_int_list_t *vertex_paths,
     igraph_vector_int_list_t *edge_paths,
-    igraph_integer_t k, igraph_integer_t from, igraph_integer_t to,
+    igraph_int_t k, igraph_int_t from, igraph_int_t to,
     igraph_neimode_t mode
 ) {
     igraph_vector_int_list_t paths_pot; /* potential shortest paths */
-    igraph_integer_t vertex_spur;
+    igraph_int_t vertex_spur;
     igraph_vector_int_t path_spur, path_root, path_total, path_shortest;
-    igraph_integer_t nr_edges_root, i_path_current, i_path, edge_path_root, vertex_root_del;
-    igraph_integer_t n;
+    igraph_int_t nr_edges_root, i_path_current, i_path, edge_path_root, vertex_root_del;
+    igraph_int_t n;
     igraph_vector_t current_weights;
     igraph_vector_int_t edges_removed;
-    const igraph_integer_t no_of_edges = igraph_ecount(graph);
+    const igraph_int_t no_of_edges = igraph_ecount(graph);
     igraph_bool_t infinite_path, already_in_potential_paths;
     igraph_vector_int_t *path_0;
     igraph_vector_int_t eids;
     igraph_real_t path_weight, shortest_path_weight;
-    igraph_integer_t edge_paths_owned = 0;
+    igraph_int_t edge_paths_owned = 0;
 
     if (!igraph_is_directed(graph) && (mode == IGRAPH_IN || mode == IGRAPH_OUT)) {
         mode = IGRAPH_ALL;
@@ -1510,7 +1485,7 @@ igraph_error_t igraph_get_k_shortest_paths(
 
     for (i_path_current = 1; i_path_current < k; i_path_current++) {
         igraph_vector_int_t *path_previous = igraph_vector_int_list_tail_ptr(edge_paths);
-        igraph_integer_t path_previous_length = igraph_vector_int_size(path_previous);
+        igraph_int_t path_previous_length = igraph_vector_int_size(path_previous);
         for (nr_edges_root = 0; nr_edges_root < path_previous_length; nr_edges_root++) {
             /* Determine spur node. */
             if (mode == IGRAPH_OUT) {
@@ -1518,13 +1493,13 @@ igraph_error_t igraph_get_k_shortest_paths(
             } else if (mode == IGRAPH_IN) {
                 vertex_spur = IGRAPH_TO(graph, VECTOR(*path_previous)[nr_edges_root]);
             } else {
-                igraph_integer_t eid = VECTOR(*path_previous)[nr_edges_root];
-                igraph_integer_t vertex_spur_1 = IGRAPH_FROM(graph, eid);
-                igraph_integer_t vertex_spur_2 = IGRAPH_TO(graph, eid);
-                igraph_integer_t vertex_spur_3;
-                igraph_integer_t vertex_spur_4;
+                igraph_int_t eid = VECTOR(*path_previous)[nr_edges_root];
+                igraph_int_t vertex_spur_1 = IGRAPH_FROM(graph, eid);
+                igraph_int_t vertex_spur_2 = IGRAPH_TO(graph, eid);
+                igraph_int_t vertex_spur_3;
+                igraph_int_t vertex_spur_4;
                 if (nr_edges_root < path_previous_length-1) {
-                    igraph_integer_t eid_next = VECTOR(*path_previous)[nr_edges_root + 1];
+                    igraph_int_t eid_next = VECTOR(*path_previous)[nr_edges_root + 1];
                     vertex_spur_3 = IGRAPH_FROM(graph, eid_next);
                     vertex_spur_4 = IGRAPH_TO(graph, eid_next);
                 } else {
@@ -1539,7 +1514,7 @@ igraph_error_t igraph_get_k_shortest_paths(
 
             /* Determine root path. */
             IGRAPH_CHECK(igraph_vector_int_resize(&path_root, nr_edges_root));
-            for (igraph_integer_t i = 0; i < nr_edges_root; i++) {
+            for (igraph_int_t i = 0; i < nr_edges_root; i++) {
                 VECTOR(path_root)[i] = VECTOR(*path_previous)[i];
             }
 
@@ -1547,7 +1522,7 @@ igraph_error_t igraph_get_k_shortest_paths(
             for (i_path = 0; i_path < i_path_current; i_path++) {
                 igraph_vector_int_t *path_check = igraph_vector_int_list_get_ptr(edge_paths, i_path);
                 igraph_bool_t equal = true;
-                for (igraph_integer_t i = 0; i < nr_edges_root; i++) {
+                for (igraph_int_t i = 0; i < nr_edges_root; i++) {
                     if (VECTOR(path_root)[i] != VECTOR(*path_check)[i]) {
                         equal = false;
                         break;
@@ -1568,12 +1543,12 @@ igraph_error_t igraph_get_k_shortest_paths(
                 } else if (mode == IGRAPH_IN) {
                     vertex_root_del = IGRAPH_TO(graph, VECTOR(path_root)[edge_path_root]);
                 } else {
-                    igraph_integer_t eid = VECTOR(*path_previous)[edge_path_root];
-                    igraph_integer_t eid_next = VECTOR(*path_previous)[edge_path_root + 1];
-                    igraph_integer_t vertex_root_del_1 = IGRAPH_FROM(graph, eid);
-                    igraph_integer_t vertex_root_del_2 = IGRAPH_TO(graph, eid);
-                    igraph_integer_t vertex_root_del_3 = IGRAPH_FROM(graph, eid_next);
-                    igraph_integer_t vertex_root_del_4 = IGRAPH_TO(graph, eid_next);
+                    igraph_int_t eid = VECTOR(*path_previous)[edge_path_root];
+                    igraph_int_t eid_next = VECTOR(*path_previous)[edge_path_root + 1];
+                    igraph_int_t vertex_root_del_1 = IGRAPH_FROM(graph, eid);
+                    igraph_int_t vertex_root_del_2 = IGRAPH_TO(graph, eid);
+                    igraph_int_t vertex_root_del_3 = IGRAPH_FROM(graph, eid_next);
+                    igraph_int_t vertex_root_del_4 = IGRAPH_TO(graph, eid_next);
                     if (vertex_root_del_1 == vertex_root_del_3 || vertex_root_del_1 == vertex_root_del_4) {
                         vertex_root_del = vertex_root_del_2;
                     } else {
@@ -1604,7 +1579,7 @@ igraph_error_t igraph_get_k_shortest_paths(
 
                 already_in_potential_paths = false;
                 n = igraph_vector_int_list_size(&paths_pot);
-                for (igraph_integer_t i = 0; i < n; i++) {
+                for (igraph_int_t i = 0; i < n; i++) {
                     if (igraph_vector_int_all_e(&path_total, igraph_vector_int_list_get_ptr(&paths_pot, i))) {
                         already_in_potential_paths = true;
                         break;
@@ -1618,7 +1593,7 @@ igraph_error_t igraph_get_k_shortest_paths(
 
             /* Cleanup */
             n = igraph_vector_int_size(&edges_removed);
-            for (igraph_integer_t i = 0; i < n; i++) {
+            for (igraph_int_t i = 0; i < n; i++) {
                 VECTOR(current_weights)[VECTOR(edges_removed)[i]] =
                     weights ? VECTOR(*weights)[VECTOR(edges_removed)[i]] : 1;
             }
@@ -1635,7 +1610,7 @@ igraph_error_t igraph_get_k_shortest_paths(
             igraph_vector_int_list_get_ptr(&paths_pot, 0), weights
         );
         i_path = 0;
-        for (igraph_integer_t i = 1; i < n; i++) {
+        for (igraph_int_t i = 1; i < n; i++) {
             path_weight = igraph_i_get_total_weight_of_path(
                 igraph_vector_int_list_get_ptr(&paths_pot, i), weights
             );
@@ -1659,10 +1634,10 @@ igraph_error_t igraph_get_k_shortest_paths(
     IGRAPH_FINALLY_CLEAN(7);
 
     if (vertex_paths) {
-        const igraph_integer_t no_of_edge_paths = igraph_vector_int_list_size(edge_paths);
+        const igraph_int_t no_of_edge_paths = igraph_vector_int_list_size(edge_paths);
 
         IGRAPH_CHECK(igraph_vector_int_list_resize(vertex_paths, no_of_edge_paths));
-        for (igraph_integer_t i = 0; i < no_of_edge_paths; i++) {
+        for (igraph_int_t i = 0; i < no_of_edge_paths; i++) {
             igraph_vector_int_t* edge_path = igraph_vector_int_list_get_ptr(edge_paths, i);
             igraph_vector_int_t* vertex_path = igraph_vector_int_list_get_ptr(vertex_paths, i);
             IGRAPH_CHECK(igraph_vertex_path_from_edge_path(graph, from, edge_path, vertex_path, mode));

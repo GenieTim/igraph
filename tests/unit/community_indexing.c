@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2022  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -49,19 +49,19 @@ int main(void) {
     igraph_community_fastgreedy(&graph, NULL, NULL, NULL, &membership);
     check(&membership);
 
-    igraph_community_label_propagation(&graph, &membership, IGRAPH_ALL, NULL, NULL, NULL);
+    igraph_community_label_propagation(&graph, &membership, IGRAPH_ALL, NULL, NULL, NULL, IGRAPH_LPA_DOMINANCE);
     check(&membership);
 
     igraph_community_walktrap(&graph, NULL, 4, NULL, NULL, &membership);
     check(&membership);
 
-    igraph_community_edge_betweenness(&graph, NULL, NULL, NULL, NULL, NULL, &membership, IGRAPH_UNDIRECTED, NULL);
+    igraph_community_edge_betweenness(&graph, NULL, NULL, NULL, NULL, NULL, &membership, IGRAPH_UNDIRECTED, NULL, NULL);
     check(&membership);
 
     igraph_community_leading_eigenvector(&graph, NULL, NULL, &membership, igraph_vcount(&graph), NULL, NULL, false, NULL, NULL, NULL, NULL, NULL);
     check(&membership);
 
-    igraph_community_leiden(&graph, NULL, NULL, 1, 0.01, 1, false, &membership, NULL, NULL);
+    igraph_community_leiden(&graph, NULL, NULL, NULL, 1, 0.01, 1, false, &membership, NULL, NULL);
     check(&membership);
 
     igraph_community_multilevel(&graph, NULL, 1, &membership, NULL, NULL);
@@ -79,12 +79,15 @@ int main(void) {
     igraph_community_spinglass(&graph, NULL, &m, NULL, &membership, NULL, 5, false, 1.0, 0.01, 0.99, IGRAPH_SPINCOMM_UPDATE_SIMPLE, 1, IGRAPH_SPINCOMM_IMP_NEG, 1);
     check(&membership);
 
+    igraph_community_infomap(&graph, NULL, NULL, 1, false, 0, &membership, NULL);
+    check(&membership);
+
     igraph_destroy(&graph);
 
     igraph_grg_game(&graph, 20, 0.5, false, NULL, NULL);
 
     handler = igraph_set_error_handler(&igraph_error_handler_ignore);
-    ret = igraph_community_optimal_modularity(&graph, NULL, &membership, NULL);
+    ret = igraph_community_optimal_modularity(&graph, NULL, 1, NULL, &membership);
     igraph_set_error_handler(handler);
     if (ret != IGRAPH_UNIMPLEMENTED) { /* Test only when GLPK is available */
         IGRAPH_ASSERT(ret == IGRAPH_SUCCESS);

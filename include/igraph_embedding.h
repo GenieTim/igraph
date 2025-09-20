@@ -1,8 +1,6 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
-   Copyright (C) 2013  Gabor Csardi <csardi.gabor@gmail.com>
-   334 Harvard street, Cambridge, MA 02139 USA
+   igraph library.
+   Copyright (C) 2013-2025  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,10 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc.,  51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301 USA
-
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef IGRAPH_EMBEDDING_H
@@ -30,10 +25,10 @@
 #include "igraph_arpack.h"
 #include "igraph_eigen.h"
 
-__BEGIN_DECLS
+IGRAPH_BEGIN_C_DECLS
 
 IGRAPH_EXPORT igraph_error_t igraph_adjacency_spectral_embedding(const igraph_t *graph,
-                                                      igraph_integer_t no,
+                                                      igraph_int_t no,
                                                       const igraph_vector_t *weights,
                                                       igraph_eigen_which_position_t which,
                                                       igraph_bool_t scaled,
@@ -51,7 +46,7 @@ typedef enum {
 } igraph_laplacian_spectral_embedding_type_t;
 
 IGRAPH_EXPORT igraph_error_t igraph_laplacian_spectral_embedding(const igraph_t *graph,
-                                                      igraph_integer_t no,
+                                                      igraph_int_t no,
                                                       const igraph_vector_t *weights,
                                                       igraph_eigen_which_position_t which,
                                                       igraph_laplacian_spectral_embedding_type_t type,
@@ -61,8 +56,8 @@ IGRAPH_EXPORT igraph_error_t igraph_laplacian_spectral_embedding(const igraph_t 
                                                       igraph_vector_t *D,
                                                       igraph_arpack_options_t *options);
 
-IGRAPH_EXPORT igraph_error_t igraph_dim_select(const igraph_vector_t *sv, igraph_integer_t *dim);
+IGRAPH_EXPORT igraph_error_t igraph_dim_select(const igraph_vector_t *sv, igraph_int_t *dim);
 
-__END_DECLS
+IGRAPH_END_C_DECLS
 
 #endif

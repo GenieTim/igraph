@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2006-2013  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -27,13 +26,13 @@
 
 igraph_error_t validate_tree(const igraph_t *graph, const igraph_t *tree,
                   const igraph_vector_t *flow, const igraph_vector_t *capacity) {
-    igraph_integer_t n = igraph_vcount(graph);
-    igraph_integer_t no_of_clusters, min_weight_edge_index;
+    igraph_int_t n = igraph_vcount(graph);
+    igraph_int_t no_of_clusters, min_weight_edge_index;
     igraph_vector_int_t edges;
     igraph_vector_int_t membership;
     igraph_real_t min_weight, flow_value;
     igraph_t copy;
-    igraph_integer_t i, j, k, m;
+    igraph_int_t i, j, k, m;
 
     if (igraph_vcount(tree) != n) {
         printf("Gomory-Hu tree should have %" IGRAPH_PRId " vertices\n", n);
@@ -59,7 +58,7 @@ igraph_error_t validate_tree(const igraph_t *graph, const igraph_t *tree,
 
     for (i = 0; i < n; i++) {
         for (j = i + 1; j < n; j++) {
-            IGRAPH_CHECK(igraph_get_shortest_path(tree, 0, &edges, i, j, IGRAPH_ALL));
+            IGRAPH_CHECK(igraph_get_shortest_path(tree, NULL, 0, &edges, i, j, IGRAPH_ALL));
             m = igraph_vector_int_size(&edges);
             if (m == 0) {
                 continue;

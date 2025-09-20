@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2023  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -22,12 +22,11 @@
 #define NODES 1000
 #define CLIQUE_SIZE 10
 #define NO_CLIQUES 10
-#define INT(a) (igraph_rng_get_integer(igraph_rng_default(), 0, (a)))
 
 void permutation(igraph_vector_int_t *vec) {
-    igraph_integer_t i, r, tmp;
+    igraph_int_t i, r, tmp;
     for (i = 0; i < CLIQUE_SIZE; i++) {
-        r = INT(NODES - 1);
+        r = RNG_INTEGER(0, NODES - 1);
         tmp = VECTOR(*vec)[i];
         VECTOR(*vec)[i] = VECTOR(*vec)[r];
         VECTOR(*vec)[r] = tmp;
@@ -35,12 +34,12 @@ void permutation(igraph_vector_int_t *vec) {
 }
 
 int sort_cmp(const igraph_vector_int_t *a, const igraph_vector_int_t *b) {
-    igraph_integer_t i, alen = igraph_vector_int_size(a), blen = igraph_vector_int_size(b);
+    igraph_int_t i, alen = igraph_vector_int_size(a), blen = igraph_vector_int_size(b);
     if (alen != blen) {
         return (alen < blen) - (alen > blen);
     }
     for (i = 0; i < alen; i++) {
-        igraph_integer_t ea = VECTOR(*a)[i], eb = VECTOR(*b)[i];
+        igraph_int_t ea = VECTOR(*a)[i], eb = VECTOR(*b)[i];
         if (ea != eb) {
             return (ea > eb) - (ea < eb);
         }
@@ -49,7 +48,7 @@ int sort_cmp(const igraph_vector_int_t *a, const igraph_vector_int_t *b) {
 }
 
 void sort_cliques(igraph_vector_int_list_t *cliques) {
-    igraph_integer_t i, n = igraph_vector_int_list_size(cliques);
+    igraph_int_t i, n = igraph_vector_int_list_size(cliques);
     for (i = 0; i < n; i++) {
         igraph_vector_int_t *v = igraph_vector_int_list_get_ptr(cliques, i);
         igraph_vector_int_sort(v);
@@ -58,7 +57,7 @@ void sort_cliques(igraph_vector_int_list_t *cliques) {
 }
 
 void print_cliques(igraph_vector_int_list_t *cliques) {
-    igraph_integer_t i;
+    igraph_int_t i;
     sort_cliques(cliques);
     for (i = 0; i < igraph_vector_int_list_size(cliques); i++) {
         igraph_vector_int_t *v = igraph_vector_int_list_get_ptr(cliques, i);
@@ -69,10 +68,10 @@ void print_cliques(igraph_vector_int_list_t *cliques) {
 int main(void) {
 
     igraph_t g, g2, cli;
-    igraph_vector_int_t perm;
+    igraph_vector_int_t perm, inv_perm;
     igraph_vector_int_list_t cliques;
-    igraph_integer_t no;
-    igraph_integer_t i;
+    igraph_int_t no;
+    igraph_int_t i;
 
     igraph_rng_seed(igraph_rng_default(), 42);
 
@@ -80,13 +79,19 @@ int main(void) {
        relatively small cliques */
 
     igraph_vector_int_init_range(&perm, 0, NODES);
-    igraph_erdos_renyi_game_gnm(&g, NODES, NODES, IGRAPH_UNDIRECTED, IGRAPH_NO_LOOPS);
+    igraph_vector_int_init(&inv_perm, NODES);
+    igraph_erdos_renyi_game_gnm(&g, NODES, NODES, IGRAPH_UNDIRECTED, IGRAPH_SIMPLE_SW, IGRAPH_EDGE_UNLABELED);
     igraph_full(&cli, CLIQUE_SIZE, IGRAPH_UNDIRECTED, IGRAPH_NO_LOOPS);
 
     for (i = 0; i < NO_CLIQUES; i++) {
-        /* Permute vertices of g */
+        /* Generate a permutation and then invert it for sake of compatibility
+         * with earlier tests when igraph_permute_vertices() took the inverse
+         * permutation */
         permutation(&perm);
-        igraph_permute_vertices(&g, &g2, &perm);
+        igraph_invert_permutation(&perm, &inv_perm);
+
+        /* Permute vertices of g */
+        igraph_permute_vertices(&g, &g2, &inv_perm);
         igraph_destroy(&g);
         g = g2;
 
@@ -97,6 +102,7 @@ int main(void) {
     }
     igraph_simplify(&g, /*remove_multiple=*/ true, /*remove_loop=*/ false, /*edge_comb=*/ NULL);
 
+    igraph_vector_int_destroy(&inv_perm);
     igraph_vector_int_destroy(&perm);
     igraph_destroy(&cli);
 
@@ -104,7 +110,8 @@ int main(void) {
 
     igraph_vector_int_list_init(&cliques, 0);
     igraph_maximal_cliques(&g, &cliques, /*min_size=*/ 3,
-                           /*max_size=*/ 0 /*no limit*/);
+                           /*max_size=*/ IGRAPH_UNLIMITED,
+                           IGRAPH_UNLIMITED);
     igraph_maximal_cliques_count(&g, &no, /*min_size=*/ 3,
                                  /*max_size=*/ 0 /*no limit*/);
 
@@ -129,7 +136,8 @@ int main(void) {
 
     igraph_vector_int_list_init(&cliques, 0);
     igraph_maximal_cliques(&g, &cliques, /*min_size=*/ 3,
-                           /*max_size=*/ 0 /*no limit*/);
+                           /*max_size=*/ IGRAPH_UNLIMITED,
+                           IGRAPH_UNLIMITED);
     igraph_maximal_cliques_count(&g, &no, /*min_size=*/ 3,
                                  /*max_size=*/ 0 /*no limit*/);
 

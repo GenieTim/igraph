@@ -1,6 +1,6 @@
 /*
-   IGraph library.
-   Copyright (C) 2024  The igraph development team
+   igraph library.
+   Copyright (C) 2024-2025  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,9 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc.,  51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301 USA
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef IGRAPH_BITSET_H
@@ -24,13 +22,14 @@
 #include "igraph_decls.h"
 #include "igraph_error.h"
 #include "igraph_vector.h"
+#include "igraph_types.h"
 
 /* Required for MSVC intrinsics such as __popcnt and __popcnt64 */
 #ifdef _MSC_VER
     #include "intrin.h"
 #endif
 
-__BEGIN_DECLS
+IGRAPH_BEGIN_C_DECLS
 
 /**
  * \ingroup bitset
@@ -159,7 +158,7 @@ __BEGIN_DECLS
  *
  * Time complexity: O(1).
  */
-#define IGRAPH_BIT_NSLOTS(nbits) ((nbits + IGRAPH_INTEGER_SIZE - (igraph_integer_t)(1)) / IGRAPH_INTEGER_SIZE)
+#define IGRAPH_BIT_NSLOTS(nbits) ((nbits + IGRAPH_INTEGER_SIZE - (igraph_int_t)(1)) / IGRAPH_INTEGER_SIZE)
 
 
 #if defined(__GNUC__)
@@ -184,24 +183,24 @@ __BEGIN_DECLS
         #ifdef HAVE__POPCNT
             #define IGRAPH_I_POPCOUNT32(x) __popcnt(x)
         #else
-            igraph_integer_t igraph_i_popcnt(igraph_uint_t x);
+            igraph_int_t igraph_i_popcnt(igraph_uint_t x);
             #define IGRAPH_I_POPCOUNT32(x) igraph_i_popcnt(x)
         #endif
     #elif IGRAPH_INTEGER_SIZE == 64
         #ifdef HAVE__POPCNT64
             #define IGRAPH_I_POPCOUNT64(x) __popcnt64(x)
         #else
-            igraph_integer_t igraph_i_popcnt(igraph_uint_t x);
+            igraph_int_t igraph_i_popcnt(igraph_uint_t x);
             #define IGRAPH_I_POPCOUNT64(x) igraph_i_popcnt(x)
         #endif
     #else
         #error "Unexpected IGRAPH_INTEGER_SIZE value."
     #endif
 
-    igraph_integer_t igraph_i_ctz32(igraph_uint_t x);
-    igraph_integer_t igraph_i_ctz64(igraph_uint_t x);
-    igraph_integer_t igraph_i_clz32(igraph_uint_t x);
-    igraph_integer_t igraph_i_clz64(igraph_uint_t x);
+    igraph_int_t igraph_i_ctz32(igraph_uint_t x);
+    igraph_int_t igraph_i_ctz64(igraph_uint_t x);
+    igraph_int_t igraph_i_clz32(igraph_uint_t x);
+    igraph_int_t igraph_i_clz64(igraph_uint_t x);
     #define IGRAPH_I_CTZ32(x) igraph_i_ctz32(x)
     #define IGRAPH_I_CTZ64(x) igraph_i_ctz64(x)
     #define IGRAPH_I_CLZ32(x) igraph_i_clz32(x)
@@ -226,24 +225,24 @@ __BEGIN_DECLS
 #define IGRAPH_CTO(x) IGRAPH_CTZ(~(x))
 
 typedef struct {
-    igraph_integer_t size;
+    igraph_int_t size;
     igraph_uint_t *stor_begin;
     igraph_uint_t *stor_end;
 } igraph_bitset_t;
 
-IGRAPH_EXPORT igraph_error_t igraph_bitset_init(igraph_bitset_t *bitset, igraph_integer_t size);
+IGRAPH_EXPORT igraph_error_t igraph_bitset_init(igraph_bitset_t *bitset, igraph_int_t size);
 IGRAPH_EXPORT void igraph_bitset_destroy(igraph_bitset_t *bitset);
 IGRAPH_EXPORT igraph_error_t igraph_bitset_init_copy(igraph_bitset_t *dest, const igraph_bitset_t *src);
 IGRAPH_EXPORT igraph_error_t igraph_bitset_update(igraph_bitset_t *dest, const igraph_bitset_t *src);
-IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_integer_t igraph_bitset_capacity(const igraph_bitset_t *bitset);
-IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_integer_t igraph_bitset_size(const igraph_bitset_t *bitset);
-IGRAPH_EXPORT igraph_error_t igraph_bitset_reserve(igraph_bitset_t *bitset, igraph_integer_t capacity);
-IGRAPH_EXPORT igraph_error_t igraph_bitset_resize(igraph_bitset_t *bitset, igraph_integer_t new_size);
-IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_integer_t igraph_bitset_popcount(const igraph_bitset_t *bitset);
-IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_integer_t igraph_bitset_countl_zero(const igraph_bitset_t *bitset);
-IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_integer_t igraph_bitset_countl_one(const igraph_bitset_t *bitset);
-IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_integer_t igraph_bitset_countr_zero(const igraph_bitset_t *bitset);
-IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_integer_t igraph_bitset_countr_one(const igraph_bitset_t *bitset);
+IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_int_t igraph_bitset_capacity(const igraph_bitset_t *bitset);
+IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_int_t igraph_bitset_size(const igraph_bitset_t *bitset);
+IGRAPH_EXPORT igraph_error_t igraph_bitset_reserve(igraph_bitset_t *bitset, igraph_int_t capacity);
+IGRAPH_EXPORT igraph_error_t igraph_bitset_resize(igraph_bitset_t *bitset, igraph_int_t new_size);
+IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_int_t igraph_bitset_popcount(const igraph_bitset_t *bitset);
+IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_int_t igraph_bitset_countl_zero(const igraph_bitset_t *bitset);
+IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_int_t igraph_bitset_countl_one(const igraph_bitset_t *bitset);
+IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_int_t igraph_bitset_countr_zero(const igraph_bitset_t *bitset);
+IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_int_t igraph_bitset_countr_one(const igraph_bitset_t *bitset);
 IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_bool_t igraph_bitset_is_all_zero(const igraph_bitset_t *bitset);
 IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_bool_t igraph_bitset_is_all_one(const igraph_bitset_t *bitset);
 IGRAPH_EXPORT IGRAPH_FUNCATTR_PURE igraph_bool_t igraph_bitset_is_any_zero(const igraph_bitset_t *bitset);
@@ -261,6 +260,6 @@ IGRAPH_EXPORT igraph_error_t igraph_bitset_print(const igraph_bitset_t *bitset);
 do { IGRAPH_CHECK(igraph_bitset_init(bitset, size)); \
      IGRAPH_FINALLY(igraph_bitset_destroy, bitset); } while (0)
 
-__END_DECLS
+IGRAPH_END_C_DECLS
 
 #endif /* IGRAPH_BITSET_H */

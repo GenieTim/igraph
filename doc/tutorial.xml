@@ -25,23 +25,29 @@ This example illustrates a couple of points:
 First, programs
 using the <command>igraph</command> library should include the
 <filename>igraph.h</filename> header
-file.
+file. Note that while igraph installs several sub-headers, the organization of these may change
+without notice. Only use <filename>igraph.h</filename> in your projects, not any of the sub-headers.
 </para></listitem>
 <listitem><para>
-Second, <command>igraph</command> uses the
-<type>igraph_integer_t</type> type for integers instead of
+Second, the library must be initialized using
+<link linkend="igraph_setup"><function>igraph_setup()</function></link>
+before use.
+</para></listitem>
+<listitem><para>
+Third, <command>igraph</command> uses the
+<type>igraph_int_t</type> type for integers instead of
 <type>int</type> or <type>long int</type>, and it also uses the
 <type>igraph_real_t</type> type for real numbers instead of
 <type>double</type>. Depending on how <command>igraph</command> was compiled, and whether you are
-using a 32-bit or 64-bit system, <type>igraph_integer_t</type> may be a 32-bit
+using a 32-bit or 64-bit system, <type>igraph_int_t</type> may be a 32-bit
 or 64-bit integer.
 </para></listitem>
 <listitem><para>
-Third, <command>igraph</command> graph objects are represented by the <type>igraph_t</type> data
+Fourth, <command>igraph</command> graph objects are represented by the <type>igraph_t</type> data
 type.
 </para></listitem>
 <listitem><para>
-Fourth, the <link
+Fifth, the <link
 linkend="igraph_erdos_renyi_game_gnm"><function>igraph_erdos_renyi_game_gnm()</function></link>
 creates a graph and <link
 linkend="igraph_destroy"><function>igraph_destroy()</function></link>
@@ -201,9 +207,9 @@ directed or undirected paths.
 <command>igraph</command> has sophisticated ways for creating graphs. The simplest
 graphs are deterministic regular structures like star graphs
 (<link linkend="igraph_star"><function>igraph_star()</function></link>),
-ring graphs (<link linkend="igraph_ring"><function>igraph_ring()</function></link>), lattices
+cycle graphs (<link linkend="igraph_cycle_graph"><function>igraph_cycle_graph()</function></link>), lattices
 (<link linkend="igraph_square_lattice"><function>igraph_square_lattice()</function></link>) or trees
-(<link linkend="igraph_kary_tree"><function>igraph_kary_tree()</function></link>).
+(<link linkend="igraph_kary_tree"><function>igraph_kary_tree()</function></link>), and many more.
 </para>
 
 <para>
@@ -229,7 +235,7 @@ on them. A vector can be indexed by the
 <link linkend="VECTOR"><function>VECTOR()</function></link> function
 (right now it is a macro). The elements of a vector are of type <type>igraph_real_t</type>
 for <link linkend="igraph_vector_t"><type>igraph_vector_t</type></link>,
-and of type <type>igraph_integer_t</type> for <type>igraph_vector_int_t</type>.
+and of type <type>igraph_int_t</type> for <type>igraph_vector_int_t</type>.
 As you might expect, <type>igraph_vector_bool_t</type> holds
 <type>igraph_bool_t</type> values. Vectors can be resized and most <command>igraph</command>
 functions returning the result in a vector automatically resize it to the size they need.
@@ -300,7 +306,7 @@ it to be able to hold the result.
 </para>
 
 <para>
-Notice that in order to print values of type <type>igraph_integer_t</type>,
+Notice that in order to print values of type <type>igraph_int_t</type>,
 we used the <constant>IGRAPH_PRId</constant> format macro constant. This
 macro is similar to the standard <constant>PRI</constant> constants defined
 in <code>stdint.h</code>, and expands to the correct <code>printf</code>

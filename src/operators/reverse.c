@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2022 The igraph development team
 
    This program is free software; you can redistribute it and/or modify
@@ -52,8 +52,8 @@
  * O(|E|) where |E| is the number of edges in the graph.
  */
 igraph_error_t igraph_reverse_edges(igraph_t *graph, const igraph_es_t eids) {
-    igraph_integer_t no_of_edges = igraph_ecount(graph);
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t no_of_edges = igraph_ecount(graph);
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
     igraph_vector_int_t edges;
     igraph_eit_t eit;
     igraph_t new_graph;
@@ -78,8 +78,8 @@ igraph_error_t igraph_reverse_edges(igraph_t *graph, const igraph_es_t eids) {
     IGRAPH_FINALLY(igraph_eit_destroy, &eit);
 
     for (; !IGRAPH_EIT_END(eit); IGRAPH_EIT_NEXT(eit)) {
-        igraph_integer_t eid = IGRAPH_EIT_GET(eit);
-        igraph_integer_t tmp = VECTOR(edges)[2*eid];
+        igraph_int_t eid = IGRAPH_EIT_GET(eit);
+        igraph_int_t tmp = VECTOR(edges)[2*eid];
         VECTOR(edges)[2*eid] = VECTOR(edges)[2*eid + 1];
         VECTOR(edges)[2*eid + 1] = tmp;
     }
@@ -88,8 +88,7 @@ igraph_error_t igraph_reverse_edges(igraph_t *graph, const igraph_es_t eids) {
     IGRAPH_CHECK(igraph_create(&new_graph, &edges, no_of_nodes, IGRAPH_DIRECTED));
     IGRAPH_FINALLY(igraph_destroy, &new_graph);
 
-    IGRAPH_I_ATTRIBUTE_DESTROY(&new_graph);
-    IGRAPH_I_ATTRIBUTE_COPY(&new_graph, graph, true, true, true); /* does IGRAPH_CHECK */
+    IGRAPH_CHECK(igraph_i_attribute_copy(&new_graph, graph, true, true, true));
 
     igraph_eit_destroy(&eit);
     igraph_vector_int_destroy(&edges);

@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-    IGraph library.
+    igraph library.
     Copyright (C) 2006-2022  The igraph development team
 
     This program is free software; you can redistribute it and/or modify
@@ -21,17 +20,16 @@
 */
 
 #include <igraph.h>
-#include <stdarg.h>
 
 #include "test_utilities.h"
 
 //TODO make public?
 igraph_error_t igraph_is_same_graph_weighted(const igraph_t *graph1, const igraph_t *graph2, igraph_bool_t *res, igraph_vector_t *weights1, igraph_vector_t *weights2) {
-    igraph_integer_t nv1 = igraph_vcount(graph1);
-    igraph_integer_t nv2 = igraph_vcount(graph2);
-    igraph_integer_t ne1 = igraph_ecount(graph1);
-    igraph_integer_t ne2 = igraph_ecount(graph2);
-    igraph_integer_t i, eid1, eid2;
+    igraph_int_t nv1 = igraph_vcount(graph1);
+    igraph_int_t nv2 = igraph_vcount(graph2);
+    igraph_int_t ne1 = igraph_ecount(graph1);
+    igraph_int_t ne2 = igraph_ecount(graph2);
+    igraph_int_t i, eid1, eid2;
 
     *res = 0; /* Assume that the graphs differ */
 
@@ -83,7 +81,7 @@ void check_sparsemat(igraph_t *g, igraph_adjacency_t mode, igraph_loops_t loops,
     igraph_is_same_graph_weighted(g, &g_sparse, &same, other_weights, &weights);
     if (!same) {
         printf("Sparse graph differs from non-sparse:\n");
-        print_weighted_graph(&g_sparse, &weights);
+        print_weighted_graph_canon(&g_sparse, &weights);
         exit(1);
     }
     igraph_sparsemat_destroy(&sparse_adjmatrix);
@@ -101,7 +99,7 @@ void test_single_matrix(igraph_matrix_t* mat, igraph_adjacency_t mode) {
     printf("No loops\n--------\n\n");
     igraph_weighted_adjacency(&g, mat, mode, &weights, IGRAPH_NO_LOOPS);
 
-    print_weighted_graph(&g, &weights);
+    print_weighted_graph_canon(&g, &weights);
     check_sparsemat(&g, mode, IGRAPH_NO_LOOPS, mat, &weights);
 
     igraph_destroy(&g);
@@ -109,14 +107,14 @@ void test_single_matrix(igraph_matrix_t* mat, igraph_adjacency_t mode) {
 
     printf("Loops once\n----------\n\n");
     igraph_weighted_adjacency(&g, mat, mode, &weights, IGRAPH_LOOPS_ONCE);
-    print_weighted_graph(&g, &weights);
+    print_weighted_graph_canon(&g, &weights);
     check_sparsemat(&g, mode, IGRAPH_LOOPS_ONCE, mat, &weights);
     igraph_destroy(&g);
     printf("\n");
 
     printf("Loops twice\n-----------\n\n");
     igraph_weighted_adjacency(&g, mat, mode, &weights, IGRAPH_LOOPS_TWICE);
-    print_weighted_graph(&g, &weights);
+    print_weighted_graph_canon(&g, &weights);
     check_sparsemat(&g, mode, IGRAPH_LOOPS_TWICE, mat, &weights);
     igraph_destroy(&g);
     printf("\n");
@@ -126,7 +124,7 @@ void test_single_matrix(igraph_matrix_t* mat, igraph_adjacency_t mode) {
     VERIFY_FINALLY_STACK();
 }
 
-void check_error(igraph_matrix_t *adjmatrix, igraph_adjacency_t mode, igraph_loops_t loops, igraph_error_t error) {
+void check_error(const igraph_matrix_t *adjmatrix, igraph_adjacency_t mode, igraph_loops_t loops, igraph_error_t error) {
     igraph_t g;
     igraph_sparsemat_t sparse_adjmatrix, sparse_adjmatrix_comp;
     igraph_vector_t weights;
@@ -148,7 +146,7 @@ int main(void) {
     igraph_matrix_t mat_sym;
     int m[4][4] = { { 0, 1, 2, 0 }, { 2, 0, 0, 1 }, { 0, 0, 4, 0 }, { 0, 1, 0, 0 } };
     int m_sym[4][4] = { { 0, 2, 2, 0 }, { 2, 0, 0, 1 }, { 2, 0, 4, 0 }, { 0, 1, 0, 0 } };
-    igraph_integer_t i, j;
+    igraph_int_t i, j;
 
     printf("0x0 matrix\n");
     printf("==========\n\n");
@@ -247,38 +245,32 @@ int main(void) {
 
         printf("\nIGRAPH_ADJ_DIRECTED\n");
         igraph_weighted_adjacency(&graph, &am, IGRAPH_ADJ_DIRECTED, &weights, IGRAPH_LOOPS_TWICE);
-        print_graph(&graph);
-        print_vector(&weights);
+        print_weighted_graph_canon(&graph, &weights);
         igraph_destroy(&graph);
 
         printf("\nIGRAPH_ADJ_MAX\n");
         igraph_weighted_adjacency(&graph, &am, IGRAPH_ADJ_MAX, &weights, IGRAPH_LOOPS_TWICE);
-        print_graph(&graph);
-        print_vector(&weights);
+        print_weighted_graph_canon(&graph, &weights);
         igraph_destroy(&graph);
 
         printf("\nIGRAPH_ADJ_MIN\n");
         igraph_weighted_adjacency(&graph, &am, IGRAPH_ADJ_MIN, &weights, IGRAPH_LOOPS_TWICE);
-        print_graph(&graph);
-        print_vector(&weights);
+        print_weighted_graph_canon(&graph, &weights);
         igraph_destroy(&graph);
 
         printf("\nIGRAPH_ADJ_LOWER\n");
         igraph_weighted_adjacency(&graph, &am, IGRAPH_ADJ_LOWER, &weights, IGRAPH_LOOPS_TWICE);
-        print_graph(&graph);
-        print_vector(&weights);
+        print_weighted_graph_canon(&graph, &weights);
         igraph_destroy(&graph);
 
         printf("\nIGRAPH_ADJ_UPPER\n");
         igraph_weighted_adjacency(&graph, &am, IGRAPH_ADJ_UPPER, &weights, IGRAPH_LOOPS_TWICE);
-        print_graph(&graph);
-        print_vector(&weights);
+        print_weighted_graph_canon(&graph, &weights);
         igraph_destroy(&graph);
 
         printf("\nIGRAPH_ADJ_PLUS\n");
         igraph_weighted_adjacency(&graph, &am, IGRAPH_ADJ_PLUS, &weights, IGRAPH_LOOPS_TWICE);
-        print_graph(&graph);
-        print_vector(&weights);
+        print_weighted_graph_canon(&graph, &weights);
         igraph_destroy(&graph);
 
         /* Must detect that the matrix is not symmetric and throw an error. */
@@ -293,8 +285,7 @@ int main(void) {
         /* Must detect that the matrix is symmetric (desite the NaNs) and succeed. */
         printf("\nIGRAPH_ADJ_UNDIRECTED (symmetric)\n");
         igraph_weighted_adjacency(&graph, &am, IGRAPH_ADJ_UNDIRECTED, &weights, IGRAPH_LOOPS_TWICE);
-        print_graph(&graph);
-        print_vector(&weights);
+        print_weighted_graph_canon(&graph, &weights);
         igraph_destroy(&graph);
 
         igraph_matrix_destroy(&am);
@@ -309,28 +300,28 @@ int main(void) {
     {
         printf("Check handling of non-square matrix error.\n");
         igraph_real_t e[] = {1, 2, 0};
-        igraph_matrix_view(&mat, e, 1, 3);
-        check_error(&mat, IGRAPH_ADJ_DIRECTED, IGRAPH_NO_LOOPS, IGRAPH_NONSQUARE);
+        const igraph_matrix_t mat = igraph_matrix_view(e, 1, 3);
+        check_error(&mat, IGRAPH_ADJ_DIRECTED, IGRAPH_NO_LOOPS, IGRAPH_EINVAL);
     }
 
     {
         printf("Check handling of invalid adjacency mode.\n");
         igraph_real_t e[] = {0, 2, 0, 3, 0, 4, 0, 5, 6};
-        igraph_matrix_view(&mat, e, 3, 3);
+        const igraph_matrix_t mat = igraph_matrix_view(e, 3, 3);
         check_error(&mat, (igraph_adjacency_t) 42, IGRAPH_LOOPS_TWICE, IGRAPH_EINVAL);
     }
 
     {
         printf("Check error for 0x1 matrix.\n");
         igraph_matrix_init(&mat, 0, 1);
-        check_error(&mat, IGRAPH_ADJ_DIRECTED, IGRAPH_LOOPS_TWICE, IGRAPH_NONSQUARE);
+        check_error(&mat, IGRAPH_ADJ_DIRECTED, IGRAPH_LOOPS_TWICE, IGRAPH_EINVAL);
         igraph_matrix_destroy(&mat);
     }
 
     {
         printf("Check error for non-symmetric matrix and IGRAPH_ADJ_UNDIRECTED.\n");
         igraph_real_t e[] = {0, 2, 0, 3, 0, 4, 0, 5, 6};
-        igraph_matrix_view(&mat, e, 3, 3);
+        const igraph_matrix_t mat = igraph_matrix_view(e, 3, 3);
         check_error(&mat, IGRAPH_ADJ_UNDIRECTED, IGRAPH_LOOPS_TWICE, IGRAPH_EINVAL);
     }
 

@@ -1,7 +1,5 @@
-/* -*- mode: C -*-  */
-/* vim:set ts=4 sw=4 sts=4 et: */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2012  Tamas Nepusz <ntamas@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
@@ -34,23 +32,10 @@
 
 /* #define MATCHING_DEBUG */
 
-#ifdef _MSC_VER
-/* MSVC does not support variadic macros */
-#include <stdarg.h>
-static void debug(const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-#ifdef MATCHING_DEBUG
-    vfprintf(stderr, fmt, args);
-#endif
-    va_end(args);
-}
-#else
 #ifdef MATCHING_DEBUG
     #define debug(...) fprintf(stderr, __VA_ARGS__)
 #else
     #define debug(...)
-#endif
 #endif
 
 /**
@@ -86,7 +71,7 @@ static void debug(const char* fmt, ...) {
 igraph_error_t igraph_is_matching(const igraph_t *graph,
                        const igraph_vector_bool_t *types, const igraph_vector_int_t *matching,
                        igraph_bool_t *result) {
-    igraph_integer_t i, j, no_of_nodes = igraph_vcount(graph);
+    igraph_int_t i, j, no_of_nodes = igraph_vcount(graph);
     igraph_bool_t conn;
 
     /* Checking match vector length */
@@ -170,7 +155,7 @@ igraph_error_t igraph_is_maximal_matching(const igraph_t *graph,
                                const igraph_vector_bool_t *types, const igraph_vector_int_t *matching,
                                igraph_bool_t *result) {
 
-    igraph_integer_t i, j, n, no_of_nodes = igraph_vcount(graph);
+    igraph_int_t i, j, n, no_of_nodes = igraph_vcount(graph);
     igraph_vector_int_t neis;
     igraph_bool_t valid;
 
@@ -188,8 +173,9 @@ igraph_error_t igraph_is_maximal_matching(const igraph_t *graph,
             continue;
         }
 
-        IGRAPH_CHECK(igraph_neighbors(graph, &neis, i,
-                                      IGRAPH_ALL));
+        IGRAPH_CHECK(igraph_neighbors(
+            graph, &neis, i, IGRAPH_ALL, IGRAPH_LOOPS, IGRAPH_MULTIPLE
+        ));
         n = igraph_vector_int_size(&neis);
         for (j = 0; j < n; j++) {
             if (VECTOR(*matching)[VECTOR(neis)[j]] == -1) {
@@ -210,12 +196,12 @@ igraph_error_t igraph_is_maximal_matching(const igraph_t *graph,
 
 static igraph_error_t igraph_i_maximum_bipartite_matching_unweighted(
         const igraph_t *graph,
-        const igraph_vector_bool_t *types, igraph_integer_t *matching_size,
+        const igraph_vector_bool_t *types, igraph_int_t *matching_size,
         igraph_vector_int_t *matching);
 
 static igraph_error_t igraph_i_maximum_bipartite_matching_weighted(
         const igraph_t *graph,
-        const igraph_vector_bool_t *types, igraph_integer_t *matching_size,
+        const igraph_vector_bool_t *types, igraph_int_t *matching_size,
         igraph_real_t *matching_weight, igraph_vector_int_t *matching,
         const igraph_vector_t *weights, igraph_real_t eps);
 
@@ -284,7 +270,7 @@ static igraph_error_t igraph_i_maximum_bipartite_matching_weighted(
  * \example examples/simple/igraph_maximum_bipartite_matching.c
  */
 igraph_error_t igraph_maximum_bipartite_matching(const igraph_t *graph,
-                                      const igraph_vector_bool_t *types, igraph_integer_t *matching_size,
+                                      const igraph_vector_bool_t *types, igraph_int_t *matching_size,
                                       igraph_real_t *matching_weight, igraph_vector_int_t *matching,
                                       const igraph_vector_t *weights, igraph_real_t eps) {
 
@@ -330,17 +316,17 @@ static igraph_error_t igraph_i_maximum_bipartite_matching_unweighted_relabel(
  */
 static igraph_error_t igraph_i_maximum_bipartite_matching_unweighted(
         const igraph_t *graph,
-        const igraph_vector_bool_t *types, igraph_integer_t *matching_size,
+        const igraph_vector_bool_t *types, igraph_int_t *matching_size,
         igraph_vector_int_t *matching) {
-    igraph_integer_t i, j, k, n, no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t num_matched;             /* number of matched vertex pairs */
+    igraph_int_t i, j, k, n, no_of_nodes = igraph_vcount(graph);
+    igraph_int_t num_matched;             /* number of matched vertex pairs */
     igraph_vector_int_t match;       /* will store the matching */
     igraph_vector_int_t labels;           /* will store the labels */
     igraph_vector_int_t neis;             /* used to retrieve the neighbors of a node */
     igraph_dqueue_int_t q;           /* a FIFO for push ordering */
     igraph_bool_t smaller_set;        /* denotes which part of the bipartite graph is smaller */
-    igraph_integer_t label_changed = 0;       /* Counter to decide when to run a global relabeling */
-    igraph_integer_t relabeling_freq = no_of_nodes / 2;
+    igraph_int_t label_changed = 0;       /* Counter to decide when to run a global relabeling */
+    igraph_int_t relabeling_freq = no_of_nodes / 2;
 
     /* We will use:
      * - FIFO push ordering
@@ -369,8 +355,9 @@ static igraph_error_t igraph_i_maximum_bipartite_matching_unweighted(
         if (MATCHED(i)) {
             continue;
         }
-        IGRAPH_CHECK(igraph_neighbors(graph, &neis, i,
-                                      IGRAPH_ALL));
+        IGRAPH_CHECK(igraph_neighbors(
+            graph, &neis, i, IGRAPH_ALL, IGRAPH_LOOPS, IGRAPH_MULTIPLE
+        ));
         n = igraph_vector_int_size(&neis);
         for (j = 0; j < n; j++) {
             k = VECTOR(neis)[j];
@@ -402,9 +389,9 @@ static igraph_error_t igraph_i_maximum_bipartite_matching_unweighted(
     /* (6) Main loop from the referenced tech report -- lines 4--13 */
     label_changed = 0;
     while (!igraph_dqueue_int_empty(&q)) {
-        igraph_integer_t v = igraph_dqueue_int_pop(&q);             /* Line 13 */
-        igraph_integer_t u = -1, label_u = 2 * no_of_nodes;
-        igraph_integer_t w;
+        igraph_int_t v = igraph_dqueue_int_pop(&q);             /* Line 13 */
+        igraph_int_t u = -1, label_u = 2 * no_of_nodes;
+        igraph_int_t w;
 
         if (label_changed >= relabeling_freq) {
             /* Run global relabeling */
@@ -416,8 +403,9 @@ static igraph_error_t igraph_i_maximum_bipartite_matching_unweighted(
         debug("Considering vertex %ld\n", v);
 
         /* Line 5: find row u among the neighbors of v s.t. label(u) is minimal */
-        IGRAPH_CHECK(igraph_neighbors(graph, &neis, v,
-                                      IGRAPH_ALL));
+        IGRAPH_CHECK(igraph_neighbors(
+            graph, &neis, v, IGRAPH_ALL, IGRAPH_LOOPS, IGRAPH_MULTIPLE
+        ));
         n = igraph_vector_int_size(&neis);
         for (i = 0; i < n; i++) {
             if (VECTOR(labels)[VECTOR(neis)[i]] < label_u) {
@@ -470,7 +458,7 @@ static igraph_error_t igraph_i_maximum_bipartite_matching_unweighted_relabel(
         const igraph_t *graph,
         const igraph_vector_bool_t *types, igraph_vector_int_t *labels,
         igraph_vector_int_t *match, igraph_bool_t smaller_set) {
-    igraph_integer_t i, j, n, no_of_nodes = igraph_vcount(graph), matched_to;
+    igraph_int_t i, j, n, no_of_nodes = igraph_vcount(graph), matched_to;
     igraph_dqueue_int_t q;
     igraph_vector_int_t neis;
 
@@ -495,11 +483,12 @@ static igraph_error_t igraph_i_maximum_bipartite_matching_unweighted_relabel(
 
     /* Run the BFS */
     while (!igraph_dqueue_int_empty(&q)) {
-        igraph_integer_t v = igraph_dqueue_int_pop(&q);
-        igraph_integer_t w;
+        igraph_int_t v = igraph_dqueue_int_pop(&q);
+        igraph_int_t w;
 
-        IGRAPH_CHECK(igraph_neighbors(graph, &neis, v,
-                                      IGRAPH_ALL));
+        IGRAPH_CHECK(igraph_neighbors(
+            graph, &neis, v, IGRAPH_ALL, IGRAPH_LOOPS, IGRAPH_MULTIPLE
+        ));
 
         n = igraph_vector_int_size(&neis);
         for (j = 0; j < n; j++) {
@@ -538,11 +527,11 @@ static igraph_error_t igraph_i_maximum_bipartite_matching_unweighted_relabel(
  */
 static igraph_error_t igraph_i_maximum_bipartite_matching_weighted(
         const igraph_t *graph,
-        const igraph_vector_bool_t *types, igraph_integer_t *matching_size,
+        const igraph_vector_bool_t *types, igraph_int_t *matching_size,
         igraph_real_t *matching_weight, igraph_vector_int_t *matching,
         const igraph_vector_t *weights, igraph_real_t eps) {
-    igraph_integer_t i, j, k, n, no_of_nodes, no_of_edges;
-    igraph_integer_t u, v, w, msize;
+    igraph_int_t i, j, k, n, no_of_nodes, no_of_edges;
+    igraph_int_t u, v, w, msize;
     igraph_t newgraph;
     igraph_vector_int_t match;       /* will store the matching */
     igraph_vector_t slack;            /* will store the slack on each edge */
@@ -553,12 +542,12 @@ static igraph_error_t igraph_i_maximum_bipartite_matching_weighted(
     igraph_bool_t smaller_set_type;   /* denotes which part of the bipartite graph is smaller */
     igraph_vector_t smaller_set;      /* stores the vertex IDs of the smaller set */
     igraph_vector_t larger_set;       /* stores the vertex IDs of the larger set */
-    igraph_integer_t smaller_set_size;        /* size of the smaller set */
-    igraph_integer_t larger_set_size;         /* size of the larger set */
+    igraph_int_t smaller_set_size;        /* size of the smaller set */
+    igraph_int_t larger_set_size;         /* size of the larger set */
     igraph_real_t dual;               /* solution of the dual problem */
     IGRAPH_UNUSED(dual);              /* We mark it as unused to prevent warnings about unused-but-set-variables. */
     igraph_adjlist_t tight_phantom_edges; /* adjacency list to manage tight phantom edges */
-    igraph_integer_t alternating_path_endpoint;
+    igraph_int_t alternating_path_endpoint;
     igraph_vector_int_t* neis;
     igraph_vector_int_t *neis2;
     igraph_inclist_t inclist;         /* incidence list of the original graph */
@@ -670,7 +659,7 @@ static igraph_error_t igraph_i_maximum_bipartite_matching_weighted(
     /* (5) Main loop until the matching becomes maximal */
     while (msize < smaller_set_size) {
         igraph_real_t min_slack, min_slack_2;
-        igraph_integer_t min_slack_u, min_slack_v;
+        igraph_int_t min_slack_u, min_slack_v;
 
         /* mark min_slack_u as unused; it is actually used when debugging, but
          * gcc complains when we are not debugging */

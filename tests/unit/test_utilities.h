@@ -41,7 +41,11 @@ void print_vector_int_list(const igraph_vector_int_list_t *v);
 /* Print elements of a matrix. Use brackets to make it clear when a vector has size zero. */
 void print_matrix_format(const igraph_matrix_t *m, FILE *f, const char *format);
 
+/* Print elements of a matrix, with indentation. Use brackets to make it clear when a vector has size zero. */
+void print_matrix_format_indent(const igraph_matrix_t *m, FILE *f, const char *format, const char *indent);
+
 void print_matrix(const igraph_matrix_t *m);
+void print_matrix_indent(const igraph_matrix_t *m, const char *indent);
 
 void print_matrix_int(const igraph_matrix_int_t *m);
 
@@ -52,6 +56,11 @@ void print_matrix_round(const igraph_matrix_t *m);
 /* Round elements of a complex matrix to integers and print them. */
 /* This is meant to be used when the elements of a matrix are integer values. */
 void print_matrix_complex_round(const igraph_matrix_complex_t *m);
+
+/* Print all matrices in a matrix list. Use brackets around each matrix
+ * and also use brackets around the entire list to make it clear when the list
+ * is empty */
+void print_matrix_list(const igraph_matrix_list_t *m);
 
 /* Print an adjacency list. Use brackets around each vector and also use
  * brackets around the entire adjacency list to make it clear when the list
@@ -88,12 +97,13 @@ void print_lazy_adjlist(igraph_lazy_adjlist_t *adjlist);
  */
 void print_lazy_inclist(igraph_lazy_inclist_t *inclist);
 
-/* Edge comparison function used for sorting in print_graph_canon(). */
-int edge_compare(const void *e1, const void *e2);
-
 /* Print a graph using a sorted edge list. Other than sorting (i.e. canonicalizing) the edge list,
  * this function is identical to print_graph(). */
 void print_graph_canon(const igraph_t *graph);
+
+/* Print a weighted graph using a sorted edge list. Other than sorting (i.e. canonicalizing)
+ * the edge list, this function is identical to print_graph(). */
+void print_weighted_graph_canon(const igraph_t *graph, const igraph_vector_t *weights);
 
 /* Print a vector, ensuring that the first nonzero element is positive. */
 void print_vector_first_nonzero_element_positive(const igraph_vector_t *vector, const char* format);
@@ -113,9 +123,9 @@ void print_matrix_complex_first_row_positive(const igraph_matrix_complex_t *matr
 /* print all graph, edge and vertex attributes of a graph */
 void print_attributes(const igraph_t *g);
 
-void matrix_init_int_row_major(igraph_matrix_t *mat, igraph_integer_t nrow, igraph_integer_t ncol, const int *elem);
-void matrix_int_init_int_row_major(igraph_matrix_int_t *mat, igraph_integer_t nrow, igraph_integer_t ncol, const int *elem);
-void matrix_init_real_row_major(igraph_matrix_t *mat, igraph_integer_t nrow, igraph_integer_t ncol, const igraph_real_t *elem);
+void matrix_init_int_row_major(igraph_matrix_t *mat, igraph_int_t nrow, igraph_int_t ncol, const int *elem);
+void matrix_int_init_int_row_major(igraph_matrix_int_t *mat, igraph_int_t nrow, igraph_int_t ncol, const int *elem);
+void matrix_init_real_row_major(igraph_matrix_t *mat, igraph_int_t nrow, igraph_int_t ncol, const igraph_real_t *elem);
 
 void matrix_chop(igraph_matrix_t *mat, igraph_real_t cutoff);
 void vector_chop(igraph_vector_t *vec, igraph_real_t cutoff);

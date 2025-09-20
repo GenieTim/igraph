@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2006-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -30,11 +29,13 @@ igraph_bool_t handshaking_lemma(igraph_t *g, igraph_vector_int_t *v) {
 }
 
 int main(void) {
-
     igraph_t g;
     igraph_vector_int_t v;
     igraph_vector_int_t seq;
-    igraph_integer_t mdeg;
+    igraph_int_t mdeg;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     /* Create graph */
     igraph_vector_int_init(&v, 8);

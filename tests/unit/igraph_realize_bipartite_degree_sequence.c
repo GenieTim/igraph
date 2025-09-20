@@ -1,5 +1,5 @@
 /*
-  IGraph library.
+  igraph library.
   Constructing realizations of degree sequences and bi-degree sequences.
   Copyright (C) 2024  The igraph development team <igraph@igraph.org>
 
@@ -26,9 +26,9 @@ void check_degrees(
     const igraph_t *graph,
     const igraph_vector_int_t *ds1, const igraph_vector_int_t *ds2
 ) {
-    const igraph_integer_t vcount = igraph_vcount(graph);
-    const igraph_integer_t n1 = igraph_vector_int_size(ds1);
-    const igraph_integer_t n2 = igraph_vector_int_size(ds2);
+    const igraph_int_t vcount = igraph_vcount(graph);
+    const igraph_int_t n1 = igraph_vector_int_size(ds1);
+    const igraph_int_t n2 = igraph_vector_int_size(ds2);
     igraph_vector_int_t degrees, expected_degrees;
 
     if (vcount != n1+n2) {
@@ -124,15 +124,15 @@ int main(void) {
     printf("\n===TESTING SMALLEST METHOD===\n");
     // Simple undirected bipartite graph.
     printf("\n===Simple, connected graph===\n");
-    igraph_integer_t deg1[] = {2, 3, 2, 1};
-    igraph_integer_t deg2[] = {3, 1, 2, 1, 1};
+    igraph_int_t deg1[] = {2, 3, 2, 1};
+    igraph_int_t deg2[] = {3, 1, 2, 1, 1};
 
     igraph_vector_int_init_array(&ds1, deg1, 4);
     igraph_vector_int_init_array(&ds2, deg2, 5);
 
     igraph_realize_bipartite_degree_sequence(&g, &ds1, &ds2, IGRAPH_SIMPLE_SW, IGRAPH_REALIZE_DEGSEQ_SMALLEST);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     igraph_is_connected(&g, &is_connected, IGRAPH_STRONG);
     igraph_is_bipartite(&g, &is_bipartite, NULL);
 
@@ -151,8 +151,8 @@ int main(void) {
     igraph_bool_t has_multi;
     printf("\n===Connected multigraph===\n");
 
-    igraph_integer_t deg1m[] = {2, 3, 1};
-    igraph_integer_t deg2m[] = {4, 2};
+    igraph_int_t deg1m[] = {2, 3, 1};
+    igraph_int_t deg2m[] = {4, 2};
 
     igraph_vector_int_init_array(&ds1, deg1m, 3);
     igraph_vector_int_init_array(&ds2, deg2m, 2);
@@ -178,15 +178,15 @@ int main(void) {
     printf("\n===TESTING LARGEST METHOD===\n");
     // Simple undirected bipartite graph.
     printf("\n===Simple graph===\n");
-    igraph_integer_t deg1l[] = {2, 3, 2, 1};
-    igraph_integer_t deg2l[] = {3, 1, 2, 1, 1};
+    igraph_int_t deg1l[] = {2, 3, 2, 1};
+    igraph_int_t deg2l[] = {3, 1, 2, 1, 1};
 
     igraph_vector_int_init_array(&ds1, deg1l, 4);
     igraph_vector_int_init_array(&ds2, deg2l, 5);
 
     igraph_realize_bipartite_degree_sequence(&g, &ds1, &ds2, IGRAPH_SIMPLE_SW, IGRAPH_REALIZE_DEGSEQ_LARGEST);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     // For this method, it does not have to be connected
     igraph_is_connected(&g, &is_connected, IGRAPH_WEAK);
     igraph_is_bipartite(&g, &is_bipartite, NULL);
@@ -205,8 +205,8 @@ int main(void) {
     // undirected bipartite multigraph.
     printf("\n===Multigraph===\n");
 
-    igraph_integer_t deg1l_m[] = {2, 3, 1};
-    igraph_integer_t deg2l_m[]= {4, 2};
+    igraph_int_t deg1l_m[] = {2, 3, 1};
+    igraph_int_t deg2l_m[]= {4, 2};
 
     igraph_vector_int_init_array(&ds1, deg1l_m, 3);
     igraph_vector_int_init_array(&ds2, deg2l_m, 2);
@@ -232,15 +232,15 @@ int main(void) {
     printf("\n===TESTING INDEX METHOD===\n");
     // Simple, undirected bipartite.
     printf("\n===Simple graph===\n");
-    igraph_integer_t deg1i[] = {1, 4, 3, 2};
-    igraph_integer_t deg2i[] = {2, 1, 1, 4, 2};
+    igraph_int_t deg1i[] = {1, 4, 3, 2};
+    igraph_int_t deg2i[] = {2, 1, 1, 4, 2};
 
     igraph_vector_int_init_array(&ds1, deg1i, 4);
     igraph_vector_int_init_array(&ds2, deg2i, 5);
 
     igraph_realize_bipartite_degree_sequence(&g, &ds1, &ds2, IGRAPH_SIMPLE_SW, IGRAPH_REALIZE_DEGSEQ_INDEX);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     // For this method, it does not have to be connected
     igraph_is_connected(&g, &is_connected, IGRAPH_STRONG);
     igraph_is_bipartite(&g, &is_bipartite, NULL);
@@ -259,8 +259,8 @@ int main(void) {
     // undirected bipartite multigraph.
     printf("\n===Multigraph===\n");
 
-    igraph_integer_t deg1i_m[] = {2, 3, 1};
-    igraph_integer_t deg2i_m[]= {4, 2};
+    igraph_int_t deg1i_m[] = {2, 3, 1};
+    igraph_int_t deg2i_m[]= {4, 2};
 
     igraph_vector_int_init_array(&ds1, deg1i_m, 3);
     igraph_vector_int_init_array(&ds2, deg2i_m, 2);

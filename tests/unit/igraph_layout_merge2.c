@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -31,7 +30,7 @@ int main(void) {
     igraph_vector_ptr_t graph_ptr;
     igraph_matrix_list_t coords_list;
     igraph_arpack_options_t arpack_opts;
-    igraph_integer_t i, j, nrow, ncol;
+    igraph_int_t i, j, nrow, ncol;
 
     /* To make things reproducible */
     igraph_rng_seed(igraph_rng_default(), 42);

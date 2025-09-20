@@ -6,6 +6,9 @@ int main(void) {
     igraph_vector_t eccentricity;
     igraph_bool_t is_tree;
 
+    /* Initialize the library. */
+    igraph_setup();
+
     /* Create a Bethe lattice with 5 levels, i.e. height 4. */
     igraph_regular_tree(&tree, 4, 3, IGRAPH_TREE_UNDIRECTED);
 
@@ -15,7 +18,7 @@ int main(void) {
 
     /* Compute and print eccentricities. The root is the most central. */
     igraph_vector_init(&eccentricity, 0);
-    igraph_eccentricity(&tree, &eccentricity, igraph_vss_all(), IGRAPH_ALL);
+    igraph_eccentricity(&tree, NULL, &eccentricity, igraph_vss_all(), IGRAPH_ALL);
     printf("Vertex eccentricities:\n");
     igraph_vector_print(&eccentricity);
     igraph_vector_destroy(&eccentricity);

@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2024  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -29,15 +29,15 @@ double rpareto(double xmin, double alpha) {
     return pow(1 - RNG_UNIF01(), -1.0 / alpha) * xmin;
 }
 
-double rzeta(igraph_integer_t xmin, double alpha) {
+double rzeta(igraph_int_t xmin, double alpha) {
     double u, v, t;
-    igraph_integer_t x;
+    igraph_int_t x;
     double alpha_minus_1 = alpha-1;
     double minus_1_over_alpha_minus_1 = -1.0 / (alpha-1);
     double b;
     double one_over_b_minus_1;
 
-    xmin = (igraph_integer_t) round(xmin);
+    xmin = (igraph_int_t) round(xmin);
 
     /* Rejection sampling for the win. We use Y=floor(U^{-1/alpha} * xmin) as the
      * envelope distribution, similarly to Chapter X.6 of Luc Devroye's book
@@ -79,7 +79,7 @@ double rzeta(igraph_integer_t xmin, double alpha) {
             v = RNG_UNIF01();
             /* 1-u is used in the base here because we want to avoid the case of
              * having zero in x */
-            x = (igraph_integer_t) floor(pow(1-u, minus_1_over_alpha_minus_1) * xmin);
+            x = (igraph_int_t) floor(pow(1-u, minus_1_over_alpha_minus_1) * xmin);
         } while (x < xmin);
         t = pow((x+1.0)/x, alpha_minus_1);
     } while (v*x*(t-1)*one_over_b_minus_1*b > t*xmin);
@@ -90,11 +90,9 @@ double rzeta(igraph_integer_t xmin, double alpha) {
 int generate_continuous(double xmin, double alpha, size_t num_samples) {
     IGRAPH_CHECK(igraph_vector_resize(&data, num_samples));
 
-    RNG_BEGIN();
     for (size_t i = 0; i < num_samples; i++) {
         VECTOR(data)[i] = rpareto(xmin, alpha);
     }
-    RNG_END();
 
     return IGRAPH_SUCCESS;
 }
@@ -102,11 +100,9 @@ int generate_continuous(double xmin, double alpha, size_t num_samples) {
 int generate_discrete(double xmin, double alpha, size_t num_samples) {
     IGRAPH_CHECK(igraph_vector_resize(&data, num_samples));
 
-    RNG_BEGIN();
     for (size_t i = 0; i < num_samples; i++) {
         VECTOR(data)[i] = rzeta(xmin, alpha);
     }
-    RNG_END();
 
     return IGRAPH_SUCCESS;
 }

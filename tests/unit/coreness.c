@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2022  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -24,8 +24,8 @@ void validate_coreness(
     const igraph_t* graph, const igraph_vector_int_t* coreness,
     igraph_neimode_t mode
 ) {
-    igraph_integer_t i, j, min_coreness, max_coreness;
-    igraph_integer_t nv = igraph_vcount(graph);
+    igraph_int_t i, j, min_coreness, max_coreness;
+    igraph_int_t nv = igraph_vcount(graph);
     igraph_t subgraph;
     igraph_vs_t vs;
     igraph_vector_int_t vids, degree;
@@ -105,12 +105,10 @@ void test_graph(const igraph_t* graph, igraph_bool_t print) {
 }
 
 void add_loop_and_multiple_edges(igraph_t* graph, igraph_real_t loop_prob, igraph_real_t multi_prob) {
-    igraph_integer_t i, n, from, to;
+    igraph_int_t i, n, from, to;
     igraph_vector_int_t extra_edges;
 
     igraph_vector_int_init(&extra_edges, 0);
-
-    RNG_BEGIN();
 
     n = igraph_vcount(graph);
     for (i = 0; i < n; i++) {
@@ -129,20 +127,16 @@ void add_loop_and_multiple_edges(igraph_t* graph, igraph_real_t loop_prob, igrap
         }
     }
 
-    RNG_END();
-
     igraph_add_edges(graph, &extra_edges, 0);
 
     igraph_vector_int_destroy(&extra_edges);
 }
 
 void remove_some_edges(igraph_t* graph, igraph_real_t prob) {
-    igraph_integer_t i, n;
+    igraph_int_t i, n;
     igraph_vector_int_t to_remove;
 
     igraph_vector_int_init(&to_remove, 0);
-
-    RNG_BEGIN();
 
     n = igraph_ecount(graph);
     for (i = 0; i < n; i++) {
@@ -150,8 +144,6 @@ void remove_some_edges(igraph_t* graph, igraph_real_t prob) {
             igraph_vector_int_push_back(&to_remove, i);
         }
     }
-
-    RNG_END();
 
     igraph_delete_edges(graph, igraph_ess_vector(&to_remove));
 

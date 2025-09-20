@@ -1,4 +1,4 @@
-/* IGraph library.
+/* igraph library.
    Copyright (C) 2022  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -23,9 +23,9 @@ int main(void) {
     igraph_t g;
 
     igraph_vector_int_init(&v, 9);
-    /* error: IGRAPH_EINVEVECTOR */
+    /* error: IGRAPH_EINVAL */
     VECTOR(v)[8] = 0;
-    CHECK_ERROR(igraph_create(&g, &v, 0, 0), IGRAPH_EINVEVECTOR);
+    CHECK_ERROR(igraph_create(&g, &v, 0, 0), IGRAPH_EINVAL);
 
     /* error: IGRAPH_EINVVID */
     igraph_vector_int_resize(&v, 8);

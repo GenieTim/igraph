@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2014  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -42,11 +41,11 @@
  */
 static igraph_error_t igraph_i_random_walk_adjlist(const igraph_t *graph,
                                     igraph_vector_int_t *vertices,
-                                    igraph_integer_t start,
+                                    igraph_int_t start,
                                     igraph_neimode_t mode,
-                                    igraph_integer_t steps,
+                                    igraph_int_t steps,
                                     igraph_random_walk_stuck_t stuck) {
-    igraph_integer_t i;
+    igraph_int_t i;
     igraph_lazy_adjlist_t adj;
 
     if (vertices == NULL) {
@@ -59,12 +58,10 @@ static igraph_error_t igraph_i_random_walk_adjlist(const igraph_t *graph,
 
     IGRAPH_CHECK(igraph_vector_int_resize(vertices, steps + 1));
 
-    RNG_BEGIN();
-
     VECTOR(*vertices)[0] = start;
     for (i = 1; i <= steps; i++) {
         igraph_vector_int_t *neis;
-        igraph_integer_t nn;
+        igraph_int_t nn;
         neis = igraph_lazy_adjlist_get(&adj, start);
 
         IGRAPH_CHECK_OOM(neis, "Failed to query neighbors.");
@@ -82,8 +79,6 @@ static igraph_error_t igraph_i_random_walk_adjlist(const igraph_t *graph,
 
         IGRAPH_ALLOW_INTERRUPTION();
     }
-
-    RNG_END();
 
     igraph_lazy_adjlist_destroy(&adj);
     IGRAPH_FINALLY_CLEAN(1);
@@ -122,13 +117,13 @@ static igraph_error_t igraph_i_random_walk_inclist(
         const igraph_vector_t *weights,
         igraph_vector_int_t *vertices,
         igraph_vector_int_t *edges,
-        igraph_integer_t start,
+        igraph_int_t start,
         igraph_neimode_t mode,
-        igraph_integer_t steps,
+        igraph_int_t steps,
         igraph_random_walk_stuck_t stuck) {
 
-    igraph_integer_t vc = igraph_vcount(graph);
-    igraph_integer_t i, next;
+    igraph_int_t vc = igraph_vcount(graph);
+    igraph_int_t i, next;
     igraph_vector_t weight_temp;
     igraph_lazy_inclist_t il;
     igraph_vector_ptr_t cdfs; /* cumulative distribution vectors for each node, used for weighted choice */
@@ -155,13 +150,11 @@ static igraph_error_t igraph_i_random_walk_inclist(
         VECTOR(cdfs)[i] = NULL;
     }
 
-    RNG_BEGIN();
-
     if (vertices) {
         VECTOR(*vertices)[0] = start;
     }
     for (i = 0; i < steps; ++i) {
-        igraph_integer_t degree, edge, idx;
+        igraph_int_t degree, edge, idx;
         igraph_vector_int_t *inc_edges = igraph_lazy_inclist_get(&il, start);
 
         IGRAPH_CHECK_OOM(inc_edges, "Failed to query incident edges.");
@@ -189,7 +182,7 @@ static igraph_error_t igraph_i_random_walk_inclist(
 
             /* compute out-edge cdf for this node if not already done */
             if (IGRAPH_UNLIKELY(! *cd)) {
-                igraph_integer_t j;
+                igraph_int_t j;
 
                 *cd = IGRAPH_CALLOC(1, igraph_vector_t);
                 IGRAPH_CHECK_OOM(*cd, "Insufficient memory for random walk.");
@@ -236,8 +229,6 @@ static igraph_error_t igraph_i_random_walk_inclist(
 
         IGRAPH_ALLOW_INTERRUPTION();
     }
-
-    RNG_END();
 
     igraph_vector_ptr_destroy_all(&cdfs);
     igraph_vector_destroy(&weight_temp);
@@ -298,13 +289,13 @@ igraph_error_t igraph_random_walk(const igraph_t *graph,
                        const igraph_vector_t *weights,
                        igraph_vector_int_t *vertices,
                        igraph_vector_int_t *edges,
-                       igraph_integer_t start,
+                       igraph_int_t start,
                        igraph_neimode_t mode,
-                       igraph_integer_t steps,
+                       igraph_int_t steps,
                        igraph_random_walk_stuck_t stuck) {
 
-    igraph_integer_t vc = igraph_vcount(graph);
-    igraph_integer_t ec = igraph_ecount(graph);
+    igraph_int_t vc = igraph_vcount(graph);
+    igraph_int_t ec = igraph_ecount(graph);
 
     if (!(mode == IGRAPH_ALL || mode == IGRAPH_IN || mode == IGRAPH_OUT)) {
         IGRAPH_ERROR("Invalid mode parameter.", IGRAPH_EINVMODE);
@@ -346,51 +337,4 @@ igraph_error_t igraph_random_walk(const igraph_t *graph,
         return igraph_i_random_walk_adjlist(graph, vertices,
                                             start, mode, steps, stuck);
     }
-}
-
-
-/**
- * \function igraph_random_edge_walk
- * \brief Performs a random walk on a graph and returns the traversed edges.
- *
- * Performs a random walk with a given length on a graph, from the given
- * start vertex. Edge directions are (potentially) considered, depending on
- * the \p mode argument.
- *
- * \param graph The input graph, it can be directed or undirected.
- *   Multiple edges are respected, so are loop edges.
- * \param weights A vector of non-negative edge weights. It is assumed
- *   that at least one strictly positive weight is found among the
- *   outgoing edges of each vertex. Additionally, no edge weight may
- *   be NaN. If either case does not hold, an error is returned. If it
- *   is a NULL pointer, all edges are considered to have equal weight.
- * \param edgewalk An initialized vector; the indices of traversed
- *   edges are stored here. It will be resized as needed.
- * \param start The start vertex for the walk.
- * \param steps The number of steps to take. If the random walk gets
- *   stuck, then the \p stuck argument specifies what happens.
- * \param mode How to walk along the edges in directed graphs.
- *   \c IGRAPH_OUT means following edge directions, \c IGRAPH_IN means
- *   going opposite the edge directions, \c IGRAPH_ALL means ignoring
- *   edge directions. This argument is ignored for undirected graphs.
- * \param stuck What to do if the random walk gets stuck.
- *   \c IGRAPH_RANDOM_WALK_STUCK_RETURN means that the function returns
- *   with a shorter walk; \c IGRAPH_RANDOM_WALK_STUCK_ERROR means
- *   that an \c IGRAPH_ERWSTUCK error is reported. In both cases,
- *   \p edgewalk is truncated to contain the actual interrupted walk.
- *
- * \return Error code.
- *
- * \deprecated-by igraph_random_walk 0.10.0
- */
-igraph_error_t igraph_random_edge_walk(
-        const igraph_t *graph,
-        const igraph_vector_t *weights,
-        igraph_vector_int_t *edgewalk,
-        igraph_integer_t start, igraph_neimode_t mode,
-        igraph_integer_t steps,
-        igraph_random_walk_stuck_t stuck) {
-
-    return igraph_random_walk(graph, weights, NULL, edgewalk,
-                              start, mode, steps, stuck);
 }

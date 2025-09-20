@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2007-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -24,7 +23,7 @@
 #include <igraph.h>
 
 void print_vector(igraph_vector_bool_t *v, FILE *f) {
-    igraph_integer_t i;
+    igraph_int_t i;
     for (i = 0; i < igraph_vector_bool_size(v); i++) {
         fprintf(f, " %i", VECTOR(*v)[i] ? 1 : 0);
     }
@@ -35,6 +34,9 @@ int main(void) {
 
     igraph_t graph;
     igraph_vector_bool_t v;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     igraph_vector_bool_init(&v, 0);
 

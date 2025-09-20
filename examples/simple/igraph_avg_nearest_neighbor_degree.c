@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2010-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -27,6 +26,9 @@ int main(void) {
     igraph_t graph;
     igraph_vector_t knn, knnk;
     igraph_vector_t weights;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     igraph_famous(&graph, "Zachary");
 

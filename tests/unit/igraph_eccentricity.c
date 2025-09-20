@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2021  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -30,13 +30,13 @@ int main(void) {
 
     printf("Null graph:\n");
     igraph_empty(&g, 0, IGRAPH_UNDIRECTED);
-    igraph_eccentricity(&g, &ecc, igraph_vss_all(), IGRAPH_OUT);
+    igraph_eccentricity(&g, NULL, &ecc, igraph_vss_all(), IGRAPH_OUT);
     print_vector(&ecc);
     igraph_destroy(&g);
 
     printf("\nSingleton graph:\n");
     igraph_empty(&g, 1, IGRAPH_UNDIRECTED);
-    igraph_eccentricity(&g, &ecc, igraph_vss_all(), IGRAPH_OUT);
+    igraph_eccentricity(&g, NULL, &ecc, igraph_vss_all(), IGRAPH_OUT);
     print_vector(&ecc);
     igraph_destroy(&g);
 
@@ -44,37 +44,37 @@ int main(void) {
     igraph_small(&g, 3, IGRAPH_UNDIRECTED,
                  0,2,
                  -1);
-    igraph_eccentricity(&g, &ecc, igraph_vss_all(), IGRAPH_OUT);
+    igraph_eccentricity(&g, NULL, &ecc, igraph_vss_all(), IGRAPH_OUT);
     print_vector(&ecc);
     igraph_destroy(&g);
 
     printf("\nUndirected path graph:\n");
     igraph_path_graph(&g, 5, IGRAPH_UNDIRECTED, /* mutual */ false);
-    igraph_eccentricity(&g, &ecc, igraph_vss_all(), IGRAPH_OUT);
+    igraph_eccentricity(&g, NULL, &ecc, igraph_vss_all(), IGRAPH_OUT);
     print_vector(&ecc);
     igraph_destroy(&g);
 
     printf("\nDirected path graph:\n");
     igraph_path_graph(&g, 5, IGRAPH_DIRECTED, /* mutual */ false);
-    igraph_eccentricity(&g, &ecc, igraph_vss_all(), IGRAPH_OUT);
+    igraph_eccentricity(&g, NULL, &ecc, igraph_vss_all(), IGRAPH_OUT);
     print_vector(&ecc);
     igraph_destroy(&g);
 
     printf("\nUndirected star:\n");
     igraph_star(&g, 10, IGRAPH_STAR_UNDIRECTED, 0);
-    igraph_eccentricity(&g, &ecc, igraph_vss_all(), IGRAPH_OUT);
+    igraph_eccentricity(&g, NULL, &ecc, igraph_vss_all(), IGRAPH_OUT);
     print_vector(&ecc);
     igraph_destroy(&g);
 
     printf("\nOut-star:\n");
     igraph_star(&g, 10, IGRAPH_STAR_OUT, 0);
-    igraph_eccentricity(&g, &ecc, igraph_vss_all(), IGRAPH_ALL);
+    igraph_eccentricity(&g, NULL, &ecc, igraph_vss_all(), IGRAPH_ALL);
     print_vector(&ecc);
     igraph_destroy(&g);
 
     printf("\nOut-star, IGRAPH_OUT:\n");
     igraph_star(&g, 10, IGRAPH_STAR_OUT, 0);
-    igraph_eccentricity(&g, &ecc, igraph_vss_all(), IGRAPH_OUT);
+    igraph_eccentricity(&g, NULL, &ecc, igraph_vss_all(), IGRAPH_OUT);
     print_vector(&ecc);
     igraph_destroy(&g);
 

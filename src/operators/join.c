@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2024  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -25,8 +24,6 @@
 /**
  * \function igraph_join
  * \brief Creates the join of two disjoint graphs.
- *
- * \experimental
  *
  * First the vertices of the second graph will be relabeled with new
  * vertex IDs to have two disjoint sets of vertex IDs, then the union
@@ -67,13 +64,13 @@ igraph_error_t igraph_join(igraph_t *res,
                            const igraph_t *left,
                            const igraph_t *right) {
 
-    igraph_integer_t no_of_nodes_left = igraph_vcount(left);
-    igraph_integer_t no_of_nodes_right = igraph_vcount(right);
-    igraph_integer_t no_of_new_edges;
+    igraph_int_t no_of_nodes_left = igraph_vcount(left);
+    igraph_int_t no_of_nodes_right = igraph_vcount(right);
+    igraph_int_t no_of_new_edges;
     igraph_vector_int_t new_edges;
     igraph_bool_t directed_left = igraph_is_directed(left);
-    igraph_integer_t i;
-    igraph_integer_t j;
+    igraph_int_t i;
+    igraph_int_t j;
 
     if (directed_left != igraph_is_directed(right)) {
         IGRAPH_ERROR("Cannot create join of directed and undirected graphs.",

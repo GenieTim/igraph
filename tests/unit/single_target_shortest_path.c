@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2006-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -37,21 +36,21 @@ int main(void) {
                  -1);
     igraph_vector_int_init(&vpath, 0);
     igraph_vector_int_init(&epath, 0);
-    igraph_get_shortest_path(&g, &vpath, &epath, 0, 4, IGRAPH_OUT);
+    igraph_get_shortest_path(&g, NULL, &vpath, &epath, 0, 4, IGRAPH_OUT);
     igraph_vector_int_print(&vpath);
     igraph_vector_int_print(&epath);
 
-    igraph_get_shortest_path(&g, &vpath, &epath, 0, 0, IGRAPH_OUT);
+    igraph_get_shortest_path(&g, NULL, &vpath, &epath, 0, 0, IGRAPH_OUT);
     igraph_vector_int_print(&vpath);
     igraph_vector_int_print(&epath);
 
     igraph_set_warning_handler(igraph_warning_handler_ignore);
-    igraph_get_shortest_path(&g, &vpath, &epath, 4, 0, IGRAPH_OUT);
+    igraph_get_shortest_path(&g, NULL, &vpath, &epath, 4, 0, IGRAPH_OUT);
     igraph_vector_int_print(&vpath);
     igraph_vector_int_print(&epath);
     igraph_set_warning_handler(igraph_warning_handler_print);
 
-    igraph_get_shortest_path(&g, &vpath, &epath, 4, 0, IGRAPH_ALL);
+    igraph_get_shortest_path(&g, NULL, &vpath, &epath, 4, 0, IGRAPH_ALL);
     igraph_vector_int_print(&vpath);
     igraph_vector_int_print(&epath);
 

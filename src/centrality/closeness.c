@@ -1,7 +1,5 @@
-/* -*- mode: C -*-  */
-/* vim:set ts=4 sw=4 sts=4 et: */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2007-2020  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -14,8 +12,8 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "igraph_centrality.h"
@@ -135,19 +133,19 @@ static igraph_error_t igraph_i_closeness_cutoff_weighted(const igraph_t *graph,
     /* See igraph_distances_dijkstra() for the implementation
        details and the dirty tricks. */
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t no_of_edges = igraph_ecount(graph);
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t no_of_edges = igraph_ecount(graph);
 
     igraph_2wheap_t Q;
     igraph_vit_t vit;
-    igraph_integer_t nodes_to_calc;
+    igraph_int_t nodes_to_calc;
 
     igraph_lazy_inclist_t inclist;
-    igraph_integer_t i, j;
+    igraph_int_t i, j;
 
     igraph_vector_t dist;
     igraph_vector_int_t which;
-    igraph_integer_t nodes_reached;
+    igraph_int_t nodes_reached;
 
     igraph_real_t mindist = 0;
 
@@ -190,7 +188,7 @@ static igraph_error_t igraph_i_closeness_cutoff_weighted(const igraph_t *graph,
 
     for (i = 0; !IGRAPH_VIT_END(vit); IGRAPH_VIT_NEXT(vit), i++) {
 
-        igraph_integer_t source = IGRAPH_VIT_GET(vit);
+        igraph_int_t source = IGRAPH_VIT_GET(vit);
         igraph_2wheap_clear(&Q);
         igraph_2wheap_push_with_index(&Q, source, -1.0);
         VECTOR(which)[source] = i + 1;
@@ -198,10 +196,10 @@ static igraph_error_t igraph_i_closeness_cutoff_weighted(const igraph_t *graph,
         nodes_reached = 0;
 
         while (!igraph_2wheap_empty(&Q)) {
-            igraph_integer_t minnei = igraph_2wheap_max_index(&Q);
+            igraph_int_t minnei = igraph_2wheap_max_index(&Q);
             /* Now check all neighbors of minnei for a shorter path */
             igraph_vector_int_t *neis = igraph_lazy_inclist_get(&inclist, minnei);
-            igraph_integer_t nlen;
+            igraph_int_t nlen;
 
             IGRAPH_CHECK_OOM(neis, "Failed to query incident edges.");
 
@@ -216,8 +214,8 @@ static igraph_error_t igraph_i_closeness_cutoff_weighted(const igraph_t *graph,
             nodes_reached++;
 
             for (j = 0; j < nlen; j++) {
-                igraph_integer_t edge = VECTOR(*neis)[j];
-                igraph_integer_t to = IGRAPH_OTHER(graph, edge, minnei);
+                igraph_int_t edge = VECTOR(*neis)[j];
+                igraph_int_t to = IGRAPH_OTHER(graph, edge, minnei);
                 igraph_real_t altdist = mindist + VECTOR(*weights)[edge];
                 igraph_real_t curdist = VECTOR(dist)[to];
 
@@ -302,8 +300,8 @@ static igraph_error_t igraph_i_closeness_cutoff_weighted(const igraph_t *graph,
  *        reachable within the cutoff is returned. If false, the inverse
  *        of the sum of distances is returned.
  * \param cutoff The maximal length of paths that will be considered.
- *        If negative, the exact closeness will be calculated (no upper
- *        limit on path lengths).
+ *        If negative or \ref IGRAPH_UNLIMITED, the exact closeness will be
+ *        calculated (no upper limit on path lengths).
  * \return Error code:
  *        \clist
  *        \cli IGRAPH_ENOMEM
@@ -330,18 +328,18 @@ igraph_error_t igraph_closeness_cutoff(const igraph_t *graph, igraph_vector_t *r
                             igraph_bool_t normalized,
                             igraph_real_t cutoff) {
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
     igraph_vector_int_t already_counted;
     igraph_vector_int_t *neis;
-    igraph_integer_t i, j;
-    igraph_integer_t nodes_reached;
+    igraph_int_t i, j;
+    igraph_int_t nodes_reached;
     igraph_adjlist_t allneis;
 
-    igraph_integer_t actdist = 0;
+    igraph_int_t actdist = 0;
 
     igraph_dqueue_int_t q;
 
-    igraph_integer_t nodes_to_calc;
+    igraph_int_t nodes_to_calc;
     igraph_vit_t vit;
 
     if (weights) {
@@ -389,7 +387,7 @@ igraph_error_t igraph_closeness_cutoff(const igraph_t *graph, igraph_vector_t *r
         IGRAPH_ALLOW_INTERRUPTION();
 
         while (!igraph_dqueue_int_empty(&q)) {
-            igraph_integer_t act = igraph_dqueue_int_pop(&q);
+            igraph_int_t act = igraph_dqueue_int_pop(&q);
             actdist = igraph_dqueue_int_pop(&q);
 
             if (cutoff >= 0 && actdist > cutoff) {
@@ -401,9 +399,9 @@ igraph_error_t igraph_closeness_cutoff(const igraph_t *graph, igraph_vector_t *r
 
             /* check the neighbors */
             neis = igraph_adjlist_get(&allneis, act);
-            igraph_integer_t nei_count = igraph_vector_int_size(neis);
+            igraph_int_t nei_count = igraph_vector_int_size(neis);
             for (j = 0; j < nei_count; j++) {
-                igraph_integer_t neighbor = VECTOR(*neis)[j];
+                igraph_int_t neighbor = VECTOR(*neis)[j];
                 if (VECTOR(already_counted)[neighbor] == i + 1) {
                     continue;
                 }
@@ -452,17 +450,17 @@ static igraph_error_t igraph_i_harmonic_centrality_unweighted(const igraph_t *gr
                                                    igraph_bool_t normalized,
                                                    igraph_real_t cutoff) {
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
     igraph_vector_int_t already_counted;
     igraph_vector_int_t *neis;
-    igraph_integer_t i, j;
+    igraph_int_t i, j;
     igraph_adjlist_t allneis;
 
-    igraph_integer_t actdist = 0;
+    igraph_int_t actdist = 0;
 
     igraph_dqueue_int_t q;
 
-    igraph_integer_t nodes_to_calc;
+    igraph_int_t nodes_to_calc;
     igraph_vit_t vit;
 
     IGRAPH_CHECK(igraph_vit_create(graph, vids, &vit));
@@ -488,7 +486,7 @@ static igraph_error_t igraph_i_harmonic_centrality_unweighted(const igraph_t *gr
          !IGRAPH_VIT_END(vit);
          IGRAPH_VIT_NEXT(vit), i++)
     {
-        igraph_integer_t source = IGRAPH_VIT_GET(vit);
+        igraph_int_t source = IGRAPH_VIT_GET(vit);
 
         igraph_dqueue_int_clear(&q);
         IGRAPH_CHECK(igraph_dqueue_int_push(&q, source));
@@ -499,7 +497,7 @@ static igraph_error_t igraph_i_harmonic_centrality_unweighted(const igraph_t *gr
         IGRAPH_ALLOW_INTERRUPTION();
 
         while (!igraph_dqueue_int_empty(&q)) {
-            igraph_integer_t act = igraph_dqueue_int_pop(&q);
+            igraph_int_t act = igraph_dqueue_int_pop(&q);
             actdist = igraph_dqueue_int_pop(&q);
 
             if (cutoff >= 0 && actdist > cutoff) {
@@ -513,9 +511,9 @@ static igraph_error_t igraph_i_harmonic_centrality_unweighted(const igraph_t *gr
 
             /* check the neighbors */
             neis = igraph_adjlist_get(&allneis, act);
-            igraph_integer_t nei_count = igraph_vector_int_size(neis);
+            igraph_int_t nei_count = igraph_vector_int_size(neis);
             for (j = 0; j < nei_count; j++) {
-                igraph_integer_t neighbor = VECTOR(*neis)[j];
+                igraph_int_t neighbor = VECTOR(*neis)[j];
                 if (VECTOR(already_counted)[neighbor] == i + 1) {
                     continue;
                 }
@@ -554,15 +552,15 @@ static igraph_error_t igraph_i_harmonic_centrality_weighted(const igraph_t *grap
     /* See igraph_distances_dijkstra() for the implementation
        details and the dirty tricks. */
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t no_of_edges = igraph_ecount(graph);
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t no_of_edges = igraph_ecount(graph);
 
     igraph_2wheap_t Q;
     igraph_vit_t vit;
-    igraph_integer_t nodes_to_calc;
+    igraph_int_t nodes_to_calc;
 
     igraph_lazy_inclist_t inclist;
-    igraph_integer_t i, j;
+    igraph_int_t i, j;
 
     igraph_vector_t dist;
     igraph_vector_int_t which;
@@ -600,17 +598,17 @@ static igraph_error_t igraph_i_harmonic_centrality_weighted(const igraph_t *grap
 
     for (i = 0; !IGRAPH_VIT_END(vit); IGRAPH_VIT_NEXT(vit), i++) {
 
-        igraph_integer_t source = IGRAPH_VIT_GET(vit);
+        igraph_int_t source = IGRAPH_VIT_GET(vit);
         igraph_2wheap_clear(&Q);
         igraph_2wheap_push_with_index(&Q, source, -1.0);
         VECTOR(which)[source] = i + 1;
         VECTOR(dist)[source] = 1.0;     /* actual distance is zero but we need to store distance + 1 */
 
         while (!igraph_2wheap_empty(&Q)) {
-            igraph_integer_t minnei = igraph_2wheap_max_index(&Q);
+            igraph_int_t minnei = igraph_2wheap_max_index(&Q);
             /* Now check all neighbors of minnei for a shorter path */
             igraph_vector_int_t *neis = igraph_lazy_inclist_get(&inclist, minnei);
-            igraph_integer_t nlen;
+            igraph_int_t nlen;
 
             IGRAPH_CHECK_OOM(neis, "Failed to query incident edges.");
 
@@ -627,8 +625,8 @@ static igraph_error_t igraph_i_harmonic_centrality_weighted(const igraph_t *grap
             }
 
             for (j = 0; j < nlen; j++) {
-                igraph_integer_t edge = VECTOR(*neis)[j];
-                igraph_integer_t to = IGRAPH_OTHER(graph, edge, minnei);
+                igraph_int_t edge = VECTOR(*neis)[j];
+                igraph_int_t to = IGRAPH_OTHER(graph, edge, minnei);
                 igraph_real_t altdist = mindist + VECTOR(*weights)[edge];
                 igraph_real_t curdist = VECTOR(dist)[to];
 

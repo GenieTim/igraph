@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2021  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,7 @@ int main(void) {
         matrix_init_real_row_major(&a, 2, 3, a_elements);
         matrix_init_int_row_major(&b, 2, 1, b_elements);
         igraph_vector_int_init_int(&ipiv, 2, 2, 2);
-        check_and_destroy(&a, &b, &ipiv, 0, IGRAPH_NONSQUARE);
+        check_and_destroy(&a, &b, &ipiv, 0, IGRAPH_EINVAL);
     }
     {
         printf("Checking singular matrix, this gives random output, so we just check for memory problems.\n\n");

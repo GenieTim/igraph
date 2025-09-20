@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2006-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -36,9 +35,9 @@ int main(void) {
 
     /* k-regular undirected graph, even degrees, no multiple edges */
     igraph_k_regular_game(&g, 10, 4, 0, 0);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_ALL, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_ALL, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     if (!is_simple) {
         return 1;
     }
@@ -49,9 +48,9 @@ int main(void) {
 
     /* k-regular undirected graph, odd degrees, even number of vertices, no multiple edges */
     igraph_k_regular_game(&g, 10, 3, 0, 0);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_ALL, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_ALL, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     if (!is_simple) {
         return 2;
     }
@@ -67,7 +66,7 @@ int main(void) {
 
     /* k-regular undirected graph, even degrees, multiple edges */
     igraph_k_regular_game(&g, 10, 4, 0, 1);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_ALL, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_ALL, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
     if (igraph_is_directed(&g)) {
         return 14;
@@ -76,7 +75,7 @@ int main(void) {
 
     /* k-regular undirected graph, odd degrees, even number of vertices, multiple edges */
     igraph_k_regular_game(&g, 10, 3, 0, 1);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_ALL, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_ALL, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
     if (igraph_is_directed(&g)) {
         return 15;
@@ -90,11 +89,11 @@ int main(void) {
 
     /* k-regular directed graph, even degrees, no multiple edges */
     igraph_k_regular_game(&g, 10, 4, 1, 0);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     if (!is_simple) {
         return 5;
     }
@@ -105,11 +104,11 @@ int main(void) {
 
     /* k-regular directed graph, odd degrees, even number of vertices, no multiple edges */
     igraph_k_regular_game(&g, 10, 3, 1, 0);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     if (!is_simple) {
         return 6;
     }
@@ -120,11 +119,11 @@ int main(void) {
 
     /* k-regular directed graph, odd degrees, odd number of vertices, no multiple edges */
     igraph_k_regular_game(&g, 9, 3, 1, 0);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     if (!is_simple) {
         return 7;
     }
@@ -135,9 +134,9 @@ int main(void) {
 
     /* k-regular directed graph, even degrees, multiple edges */
     igraph_k_regular_game(&g, 10, 4, 1, 1);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
     if (!igraph_is_directed(&g)) {
         return 16;
@@ -146,9 +145,9 @@ int main(void) {
 
     /* k-regular directed graph, odd degrees, even number of vertices, multiple edges */
     igraph_k_regular_game(&g, 10, 3, 1, 1);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
     if (!igraph_is_directed(&g)) {
         return 17;
@@ -157,9 +156,9 @@ int main(void) {
 
     /* k-regular directed graph, odd degrees, odd number of vertices, multiple edges */
     igraph_k_regular_game(&g, 9, 3, 1, 1);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_IN, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
-    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, 1);
+    igraph_degree(&g, &deg, igraph_vss_all(), IGRAPH_OUT, IGRAPH_LOOPS);
     igraph_vector_int_print(&deg);
     if (!igraph_is_directed(&g)) {
         return 18;

@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2007-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -27,6 +26,9 @@ int main(void) {
 
     igraph_t graph;
     igraph_bool_t res;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     igraph_small(&graph, 0, IGRAPH_DIRECTED, 0, 1, 1, 2, 2, 1, 0, 1, 1, 0, 3, 4, 11, 10, -1);
     igraph_has_multiple(&graph, &res);

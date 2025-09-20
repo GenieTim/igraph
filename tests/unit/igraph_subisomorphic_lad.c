@@ -1,4 +1,4 @@
-/* IGraph library.
+/* igraph library.
    Copyright (C) 2022  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -23,8 +23,8 @@
 void test_k_motifs(const igraph_t *graph, const int k, const int class_count, igraph_bool_t directed) {
     igraph_vector_t randesu_counts, lad_counts;
     igraph_bool_t equal;
-    igraph_integer_t i, n;
-    igraph_integer_t vcount;
+    igraph_int_t i, n;
+    igraph_int_t vcount;
     igraph_real_t expected_count;
 
     vcount = igraph_vcount(graph);
@@ -36,12 +36,12 @@ void test_k_motifs(const igraph_t *graph, const int k, const int class_count, ig
     for (i = 0; i < n; i++) {
         igraph_t pattern;
         igraph_vector_int_list_t maps;
-        igraph_integer_t nAutomorphisms;
+        igraph_int_t nAutomorphisms;
 
         igraph_isoclass_create(&pattern, k, i, directed);
         igraph_vector_int_list_init(&maps, 0);
 
-        igraph_subisomorphic_lad(&pattern, graph, NULL, NULL, NULL, &maps, /* induced = */ true, 0);
+        igraph_subisomorphic_lad(&pattern, graph, NULL, NULL, NULL, &maps, /* induced = */ true);
 
         igraph_count_subisomorphisms_vf2(&pattern, &pattern, NULL, NULL, NULL, NULL, &nAutomorphisms, NULL, NULL, NULL);
 
@@ -87,13 +87,13 @@ void test_k_motifs(const igraph_t *graph, const int k, const int class_count, ig
 
 void test_motifs(void) {
     igraph_t graph;
-    igraph_integer_t count;
+    igraph_int_t count;
 
     igraph_rng_seed(igraph_rng_default(), 42);
 
     /* The graph is chosen to have approximately 50% density
      * so that most motifs have a high chance of appearing. */
-    igraph_erdos_renyi_game_gnm(&graph, 30, 400, IGRAPH_DIRECTED, IGRAPH_NO_LOOPS);
+    igraph_erdos_renyi_game_gnm(&graph, 30, 400, IGRAPH_DIRECTED, IGRAPH_SIMPLE_SW, IGRAPH_EDGE_UNLABELED);
 
     igraph_graph_count(3, IGRAPH_DIRECTED, &count);
     test_k_motifs(&graph, 3, count, IGRAPH_DIRECTED);
@@ -106,13 +106,13 @@ void test_motifs(void) {
 
 void test_motifs_undirected(void) {
     igraph_t graph;
-    igraph_integer_t count;
+    igraph_int_t count;
 
     igraph_rng_seed(igraph_rng_default(), 137);
 
     /* The graph is chosen to have slightly higher than 50% density
      * so that most connected motifs have a high chance of appearing. */
-    igraph_erdos_renyi_game_gnm(&graph, 18, 80, IGRAPH_UNDIRECTED, IGRAPH_NO_LOOPS);
+    igraph_erdos_renyi_game_gnm(&graph, 18, 80, IGRAPH_UNDIRECTED, IGRAPH_SIMPLE_SW, IGRAPH_EDGE_UNLABELED);
 
     igraph_graph_count(3, IGRAPH_UNDIRECTED, &count);
     test_k_motifs(&graph, 3, count, IGRAPH_UNDIRECTED);
@@ -125,7 +125,7 @@ void test_motifs_undirected(void) {
     /* Use a smaller graph so that the test would not take too long.
      * The graph is chosen to have slightly higher than 50% density
      * so that most connected motifs have a high chance of appearing. */
-    igraph_erdos_renyi_game_gnm(&graph, 12, 36, IGRAPH_UNDIRECTED, IGRAPH_NO_LOOPS);
+    igraph_erdos_renyi_game_gnm(&graph, 12, 36, IGRAPH_UNDIRECTED, IGRAPH_SIMPLE_SW, IGRAPH_EDGE_UNLABELED);
 
     igraph_graph_count(5, IGRAPH_UNDIRECTED, &count);
     test_k_motifs(&graph, 5, count, IGRAPH_UNDIRECTED);
@@ -158,7 +158,7 @@ int main(void) {
 
     igraph_small(&pattern, 0, IGRAPH_UNDIRECTED, -1);
     igraph_subisomorphic_lad(&pattern, &target, /*domains=*/ NULL, &iso, &map, &maps,
-                             /*induced=*/ false, /*time_limit=*/ 0);
+                             /*induced=*/ false);
 
     IGRAPH_ASSERT(iso);
     IGRAPH_ASSERT(igraph_vector_int_size(&map) == 0);
@@ -176,9 +176,11 @@ int main(void) {
     igraph_vector_int_init(&map, 0);
     igraph_vector_int_list_init(&maps, 0);
     igraph_small(&pattern, 0, IGRAPH_DIRECTED, -1);
-    CHECK_ERROR(igraph_subisomorphic_lad(&pattern, &target, /*domains=*/ 0,
-                                      &iso, &map, &maps, /*induced=*/ 0,
-                                      /*time_limit=*/ 0), IGRAPH_EINVAL);
+    CHECK_ERROR(
+        igraph_subisomorphic_lad(&pattern, &target, /*domains=*/ 0,
+        &iso, &map, &maps, /*induced=*/ 0),
+        IGRAPH_EINVAL
+    );
     igraph_vector_int_destroy(&map);
     igraph_vector_int_list_destroy(&maps);
     igraph_destroy(&pattern);

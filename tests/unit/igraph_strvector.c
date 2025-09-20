@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2022  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -22,7 +21,7 @@
 #include "test_utilities.h"
 
 void strvector_print(const igraph_strvector_t *sv) {
-    igraph_integer_t i, s = igraph_strvector_size(sv);
+    igraph_int_t i, s = igraph_strvector_size(sv);
     for (i = 0; i < s; i++) {
         printf("\"%s\"\n", igraph_strvector_get(sv, i));
     }
@@ -131,6 +130,13 @@ int main(void) {
     igraph_strvector_append(&sv1, &sv2);
     strvector_print(&sv1);
 
+    printf("igraph_strvector_swap\n");
+    igraph_strvector_swap(&sv1, &sv2);
+    printf("===\n");
+    strvector_print(&sv1);
+    printf("===\n");
+    strvector_print(&sv2);
+
     igraph_strvector_destroy(&sv1);
     igraph_strvector_destroy(&sv2);
 
@@ -153,7 +159,7 @@ int main(void) {
     igraph_strvector_append(&sv3, &sv4);
     IGRAPH_ASSERT(igraph_strvector_size(&sv1) == igraph_strvector_size(&sv3));
 
-    for (igraph_integer_t i=0; i < igraph_strvector_size(&sv1); ++i) {
+    for (igraph_int_t i=0; i < igraph_strvector_size(&sv1); ++i) {
         IGRAPH_ASSERT(strcmp(igraph_strvector_get(&sv1, i), igraph_strvector_get(&sv3, i)) == 0);
     }
 

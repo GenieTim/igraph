@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2006-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -26,6 +25,9 @@
 int main(void) {
 
     igraph_t g1, g2;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     /* complementer of the empty graph */
     igraph_empty(&g1, 5, IGRAPH_DIRECTED);

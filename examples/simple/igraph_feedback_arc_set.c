@@ -1,7 +1,5 @@
-/* -*- mode: C -*-  */
-/* vim:set ts=4 sw=4 sts=4 et: */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2011-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -30,6 +28,9 @@ int main(void) {
     igraph_vector_t weights;
     igraph_vector_int_t result;
     igraph_bool_t dag;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     igraph_vector_int_init(&result, 0);
 

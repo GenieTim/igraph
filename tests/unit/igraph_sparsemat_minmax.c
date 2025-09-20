@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2014  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -37,7 +36,7 @@ typedef igraph_error_t fun(igraph_sparsemat_t *A, igraph_vector_t *res);
 
 int doit(int which) {
 
-    igraph_integer_t  i;
+    igraph_int_t  i;
     igraph_sparsemat_t A, A2;
     igraph_vector_t vec;
     fun *colfun, *rowfun;

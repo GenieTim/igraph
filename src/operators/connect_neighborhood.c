@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2005-2021 The igraph development team
 
    This program is free software; you can redistribute it and/or modify
@@ -66,14 +65,14 @@
  * Time complexity: O(|V|*d^k), |V| is the number of vertices in the
  * graph, d is the average degree and k is the \p order argument.
  */
-igraph_error_t igraph_connect_neighborhood(igraph_t *graph, igraph_integer_t order,
+igraph_error_t igraph_connect_neighborhood(igraph_t *graph, igraph_int_t order,
                                 igraph_neimode_t mode) {
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
     igraph_dqueue_int_t q;
     igraph_vector_int_t edges;
-    igraph_integer_t i, j, in;
-    igraph_integer_t *added;
+    igraph_int_t i, j, in;
+    igraph_int_t *added;
     igraph_vector_int_t neis;
 
     if (order < 0) {
@@ -90,7 +89,7 @@ igraph_error_t igraph_connect_neighborhood(igraph_t *graph, igraph_integer_t ord
     }
 
     IGRAPH_VECTOR_INT_INIT_FINALLY(&edges, 0);
-    added = IGRAPH_CALLOC(no_of_nodes, igraph_integer_t);
+    added = IGRAPH_CALLOC(no_of_nodes, igraph_int_t);
     IGRAPH_CHECK_OOM(added, "Cannot connect neighborhood.");
 
     IGRAPH_FINALLY(igraph_free, added);
@@ -99,11 +98,11 @@ igraph_error_t igraph_connect_neighborhood(igraph_t *graph, igraph_integer_t ord
 
     for (i = 0; i < no_of_nodes; i++) {
         added[i] = i + 1;
-        IGRAPH_CHECK(igraph_neighbors(graph, &neis, i, mode));
+        IGRAPH_CHECK(igraph_neighbors(graph, &neis, i, mode, IGRAPH_LOOPS, IGRAPH_MULTIPLE));
         in = igraph_vector_int_size(&neis);
         if (order > 1) {
             for (j = 0; j < in; j++) {
-                igraph_integer_t nei = VECTOR(neis)[j];
+                igraph_int_t nei = VECTOR(neis)[j];
                 added[nei] = i + 1;
                 IGRAPH_CHECK(igraph_dqueue_int_push(&q, nei));
                 IGRAPH_CHECK(igraph_dqueue_int_push(&q, 1));
@@ -111,15 +110,15 @@ igraph_error_t igraph_connect_neighborhood(igraph_t *graph, igraph_integer_t ord
         }
 
         while (!igraph_dqueue_int_empty(&q)) {
-            igraph_integer_t actnode = igraph_dqueue_int_pop(&q);
-            igraph_integer_t actdist = igraph_dqueue_int_pop(&q);
-            igraph_integer_t n;
-            IGRAPH_CHECK(igraph_neighbors(graph, &neis, actnode, mode));
+            igraph_int_t actnode = igraph_dqueue_int_pop(&q);
+            igraph_int_t actdist = igraph_dqueue_int_pop(&q);
+            igraph_int_t n;
+            IGRAPH_CHECK(igraph_neighbors(graph, &neis, actnode, mode, IGRAPH_LOOPS, IGRAPH_MULTIPLE));
             n = igraph_vector_int_size(&neis);
 
             if (actdist < order - 1) {
                 for (j = 0; j < n; j++) {
-                    igraph_integer_t nei = VECTOR(neis)[j];
+                    igraph_int_t nei = VECTOR(neis)[j];
                     if (added[nei] != i + 1) {
                         added[nei] = i + 1;
                         IGRAPH_CHECK(igraph_dqueue_int_push(&q, nei));
@@ -137,7 +136,7 @@ igraph_error_t igraph_connect_neighborhood(igraph_t *graph, igraph_integer_t ord
                 }
             } else {
                 for (j = 0; j < n; j++) {
-                    igraph_integer_t nei = VECTOR(neis)[j];
+                    igraph_int_t nei = VECTOR(neis)[j];
                     if (added[nei] != i + 1) {
                         added[nei] = i + 1;
                         if (mode != IGRAPH_ALL || i < nei) {
@@ -171,11 +170,9 @@ igraph_error_t igraph_connect_neighborhood(igraph_t *graph, igraph_integer_t ord
 
 /**
  * \function igraph_graph_power
- * \brief The kth power of a graph.
+ * \brief The k-th power of a graph.
  *
- * \experimental
- *
- * The kth power of a graph G is a simple graph where vertex \c u is connected to
+ * The k-th power of a graph G is a simple graph where vertex \c u is connected to
  * \c v by a single edge if \c v is reachable from \c u in G within at most k steps.
  * By convention, the zeroth power of a graph has no edges. The first power is
  * identical to the original graph, except that multiple edges and self-loops
@@ -203,10 +200,10 @@ igraph_error_t igraph_connect_neighborhood(igraph_t *graph, igraph_integer_t ord
  * graph, d is the average degree and k is the \p order argument.
  */
 igraph_error_t igraph_graph_power(const igraph_t *graph, igraph_t *res,
-                                  igraph_integer_t order, igraph_bool_t directed) {
+                                  igraph_int_t order, igraph_bool_t directed) {
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t no_of_edges = igraph_ecount(graph);
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t no_of_edges = igraph_ecount(graph);
     igraph_vector_int_t edges;
     igraph_adjlist_t al;
     igraph_bool_t dir = igraph_is_directed(graph) && directed;
@@ -218,8 +215,7 @@ igraph_error_t igraph_graph_power(const igraph_t *graph, igraph_t *res,
     }
 
     IGRAPH_CHECK(igraph_empty(res, no_of_nodes, dir));
-    IGRAPH_I_ATTRIBUTE_DESTROY(res);
-    IGRAPH_I_ATTRIBUTE_COPY(res, graph, /* graph */ true, /* vertex */ true, /* edge */ false);
+    IGRAPH_CHECK(igraph_i_attribute_copy(res, graph, true, true, /* edges= */ false));
     if (order == 0) {
         return IGRAPH_SUCCESS;
     }
@@ -233,9 +229,9 @@ igraph_error_t igraph_graph_power(const igraph_t *graph, igraph_t *res,
     IGRAPH_VECTOR_INT_INIT_FINALLY(&edges, no_of_edges);
     igraph_vector_int_clear(&edges);
 
-    for (igraph_integer_t i = 0; i < no_of_nodes; i++) {
+    for (igraph_int_t i = 0; i < no_of_nodes; i++) {
         igraph_vector_int_t *tmp = igraph_adjlist_get(&al, i);
-        for (igraph_integer_t j = 0; j < igraph_vector_int_size(tmp); j++) {
+        for (igraph_int_t j = 0; j < igraph_vector_int_size(tmp); j++) {
             if (dir || i < VECTOR(*tmp)[j]) {
                 igraph_vector_int_push_back(&edges, i);
                 igraph_vector_int_push_back(&edges, VECTOR(*tmp)[j]);
@@ -246,39 +242,39 @@ igraph_error_t igraph_graph_power(const igraph_t *graph, igraph_t *res,
     if (order > 1) {
         /* order > 1, so add more edges. */
 
-        igraph_integer_t d_i, d_actnode;
-        igraph_integer_t *added;
+        igraph_int_t d_i, d_actnode;
+        igraph_int_t *added;
         const igraph_vector_int_t *neis;
         igraph_dqueue_int_t q;
 
-        added = IGRAPH_CALLOC(no_of_nodes, igraph_integer_t);
+        added = IGRAPH_CALLOC(no_of_nodes, igraph_int_t);
         IGRAPH_CHECK_OOM(added, "Insufficient memory for graph power.");
         IGRAPH_FINALLY(igraph_free, added);
 
         IGRAPH_DQUEUE_INT_INIT_FINALLY(&q, 100);
 
-        for (igraph_integer_t i = 0; i < no_of_nodes; i++) {
+        for (igraph_int_t i = 0; i < no_of_nodes; i++) {
             added[i] = i + 1;
             neis = igraph_adjlist_get(&al, i);
             d_i = igraph_vector_int_size(neis);
 
-            for (igraph_integer_t j = 0; j < d_i; j++) {
-                igraph_integer_t nei = VECTOR(*neis)[j];
+            for (igraph_int_t j = 0; j < d_i; j++) {
+                igraph_int_t nei = VECTOR(*neis)[j];
                 added[nei] = i + 1;
                 IGRAPH_CHECK(igraph_dqueue_int_push(&q, nei));
                 IGRAPH_CHECK(igraph_dqueue_int_push(&q, 1));
             }
 
             while (!igraph_dqueue_int_empty(&q)) {
-                igraph_integer_t actnode = igraph_dqueue_int_pop(&q);
-                igraph_integer_t actdist = igraph_dqueue_int_pop(&q);
+                igraph_int_t actnode = igraph_dqueue_int_pop(&q);
+                igraph_int_t actdist = igraph_dqueue_int_pop(&q);
 
                 neis = igraph_adjlist_get(&al, actnode);
                 d_actnode = igraph_vector_int_size(neis);
 
                 if (actdist < order - 1) {
-                    for (igraph_integer_t j = 0; j < d_actnode; j++) {
-                        igraph_integer_t nei = VECTOR(*neis)[j];
+                    for (igraph_int_t j = 0; j < d_actnode; j++) {
+                        igraph_int_t nei = VECTOR(*neis)[j];
                         if (added[nei] != i + 1) {
                             added[nei] = i + 1;
                             IGRAPH_CHECK(igraph_dqueue_int_push(&q, nei));
@@ -290,8 +286,8 @@ igraph_error_t igraph_graph_power(const igraph_t *graph, igraph_t *res,
                         }
                     }
                 } else {
-                    for (igraph_integer_t j = 0; j < d_actnode; j++) {
-                        igraph_integer_t nei = VECTOR(*neis)[j];
+                    for (igraph_int_t j = 0; j < d_actnode; j++) {
+                        igraph_int_t nei = VECTOR(*neis)[j];
                         if (added[nei] != i + 1) {
                             added[nei] = i + 1;
                             if (dir || i < nei) {

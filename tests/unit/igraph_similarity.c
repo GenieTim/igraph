@@ -1,4 +1,4 @@
-/* IGraph library.
+/* igraph library.
    Copyright (C) 2022  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -22,13 +22,13 @@ int check_jaccard_all(const igraph_t* g, igraph_matrix_t* m,
                       igraph_neimode_t mode, igraph_bool_t loops) {
     igraph_vector_int_t pairs;
     igraph_vector_t res;
-    igraph_integer_t i, j, k, n;
+    igraph_int_t i, j, k, n;
     igraph_eit_t eit;
 
     igraph_vector_init(&res, 0);
 
     /* First, query the similarities for all the vertices to a matrix */
-    igraph_similarity_jaccard(g, m, igraph_vss_all(), mode, loops);
+    igraph_similarity_jaccard(g, m, igraph_vss_all(), igraph_vss_all(), mode, loops);
 
     /* Second, query the similarities for all pairs using a pair vector */
     n = igraph_vcount(g);
@@ -57,7 +57,7 @@ int check_jaccard_all(const igraph_t* g, igraph_matrix_t* m,
     igraph_eit_create(g, igraph_ess_all(IGRAPH_EDGEORDER_FROM), &eit);
     k = 0;
     while (!IGRAPH_EIT_END(eit)) {
-        igraph_integer_t eid = IGRAPH_EIT_GET(eit);
+        igraph_int_t eid = IGRAPH_EIT_GET(eit);
         i = IGRAPH_FROM(g, eid);
         j = IGRAPH_TO(g, eid);
         if (fabs(VECTOR(res)[k] - MATRIX(*m, i, j)) > 1e-6) {
@@ -81,13 +81,13 @@ int check_dice_all(const igraph_t* g, igraph_matrix_t* m,
                    igraph_neimode_t mode, igraph_bool_t loops) {
     igraph_vector_int_t pairs;
     igraph_vector_t res;
-    igraph_integer_t i, j, k, n;
+    igraph_int_t i, j, k, n;
     igraph_eit_t eit;
 
     igraph_vector_init(&res, 0);
 
     /* First, query the similarities for all the vertices to a matrix */
-    igraph_similarity_dice(g, m, igraph_vss_all(), mode, loops);
+    igraph_similarity_dice(g, m, igraph_vss_all(), igraph_vss_all(), mode, loops);
 
     /* Second, query the similarities for all pairs using a pair vector */
     n = igraph_vcount(g);
@@ -116,7 +116,7 @@ int check_dice_all(const igraph_t* g, igraph_matrix_t* m,
     igraph_eit_create(g, igraph_ess_all(IGRAPH_EDGEORDER_FROM), &eit);
     k = 0;
     while (!IGRAPH_EIT_END(eit)) {
-        igraph_integer_t eid = IGRAPH_EIT_GET(eit);
+        igraph_int_t eid = IGRAPH_EIT_GET(eit);
         i = IGRAPH_FROM(g, eid);
         j = IGRAPH_TO(g, eid);
         if (fabs(VECTOR(res)[k] - MATRIX(*m, i, j)) > 1e-6) {
@@ -154,7 +154,10 @@ int main(void) {
         return 1;
     }
 
-    igraph_similarity_jaccard(&g, &m, igraph_vss_range(1, 3), IGRAPH_ALL, 0);
+    igraph_similarity_jaccard(&g, &m, igraph_vss_range(1, 3), igraph_vss_range(1, 3), IGRAPH_ALL, IGRAPH_NO_LOOPS);
+    print_matrix(&m);
+
+    igraph_similarity_jaccard(&g, &m, igraph_vss_range(1, 3), igraph_vss_1(1), IGRAPH_ALL, IGRAPH_NO_LOOPS);
     print_matrix(&m);
 
     ret = check_jaccard_all(&g, &m, IGRAPH_OUT, 1);

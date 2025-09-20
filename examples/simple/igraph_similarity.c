@@ -1,7 +1,5 @@
-/* -*- mode: C -*-  */
-/* vim:set ts=4 sw=4 sts=4 et: */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2006-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -30,7 +28,10 @@ int main(void) {
     igraph_matrix_t m;
     igraph_vector_int_t pairs;
     igraph_vector_t res;
-    igraph_integer_t i, j, n;
+    igraph_int_t i, j, n;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     igraph_small(&g, 0, IGRAPH_DIRECTED,
                  0, 1, 2, 1, 2, 0, 3, 0,
@@ -49,7 +50,7 @@ int main(void) {
     }
 
     printf("Jaccard similarity:\n");
-    igraph_similarity_jaccard(&g, &m, igraph_vss_range(1, 3), IGRAPH_ALL, 0);
+    igraph_similarity_jaccard(&g, &m, igraph_vss_range(1, 3), igraph_vss_range(1, 3), IGRAPH_ALL, IGRAPH_NO_LOOPS);
     igraph_matrix_printf(&m, "%.2f");
 
     printf("\nJaccard similarity, pairs:\n");
@@ -61,7 +62,7 @@ int main(void) {
     igraph_vector_print(&res);
 
     printf("\nDice similarity:\n");
-    igraph_similarity_dice(&g, &m, igraph_vss_range(1, 3), IGRAPH_ALL, 0);
+    igraph_similarity_dice(&g, &m, igraph_vss_range(1, 3), igraph_vss_range(1, 3), IGRAPH_ALL, IGRAPH_NO_LOOPS);
     igraph_matrix_printf(&m, "%.2f");
 
     printf("\nDice similarity, pairs:\n");

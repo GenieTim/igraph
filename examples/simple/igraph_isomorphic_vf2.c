@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2009-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -26,13 +25,14 @@
 #include <stdlib.h>
 
 int main(void) {
+    igraph_setup();
 
     igraph_t ring1, ring2;
     igraph_vector_int_t color1, color2;
     igraph_vector_int_t perm;
     igraph_bool_t iso;
-    igraph_integer_t count;
-    igraph_integer_t i;
+    igraph_int_t count;
+    igraph_int_t i;
 
     igraph_rng_seed(igraph_rng_default(), 12345);
 
@@ -41,7 +41,7 @@ int main(void) {
     igraph_vector_int_shuffle(&perm);
     igraph_permute_vertices(&ring1, &ring2, &perm);
 
-    /* Everything has the same colors */
+    /* Everything has the same color */
     igraph_vector_int_init(&color1, igraph_vcount(&ring1));
     igraph_vector_int_init(&color2, igraph_vcount(&ring2));
     igraph_isomorphic_vf2(&ring1, &ring2, &color1, &color2, 0, 0, &iso, 0, 0, 0, 0, 0);
@@ -52,7 +52,10 @@ int main(void) {
 
     /* Two colors, just counting */
     for (i = 0; i < igraph_vector_int_size(&color1); i += 2) {
-        VECTOR(color1)[i] = VECTOR(color2)[VECTOR(perm)[i]] = 1;
+        VECTOR(color1)[i] = 1;
+    }
+    for (i = 0; i < igraph_vector_int_size(&color2); i++) {
+        VECTOR(color2)[i] = VECTOR(color1)[VECTOR(perm)[i]];
     }
     igraph_count_isomorphisms_vf2(&ring1, &ring2, &color1, &color2, 0, 0, &count, 0, 0, 0);
     if (count != 100) {

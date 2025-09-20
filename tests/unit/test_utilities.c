@@ -27,7 +27,7 @@ void print_real(FILE *f, igraph_real_t x, const char *format) {
 }
 
 void print_vector_format(const igraph_vector_t *v, FILE *f, const char *format) {
-    igraph_integer_t i, n = igraph_vector_size(v);
+    igraph_int_t i, n = igraph_vector_size(v);
     fprintf(f, "(");
     for (i=0; i < n; i++) {
         fprintf(f, " ");
@@ -50,7 +50,7 @@ void print_vector_round(const igraph_vector_t *v) {
 
 /* Print elements of an integer vector */
 void print_vector_int(const igraph_vector_int_t *v) {
-    igraph_integer_t i, n = igraph_vector_int_size(v);
+    igraph_int_t i, n = igraph_vector_int_size(v);
     printf("(");
     for (i=0; i < n; i++) {
         printf(" %" IGRAPH_PRId, VECTOR(*v)[i]);
@@ -62,7 +62,7 @@ void print_vector_int(const igraph_vector_int_t *v) {
  * and also use brackets around the entire list to make it clear when the list
  * is empty */
 void print_vector_int_list(const igraph_vector_int_list_t *v) {
-    igraph_integer_t i, n = igraph_vector_int_list_size(v);
+    igraph_int_t i, n = igraph_vector_int_list_size(v);
     printf("{\n");
     for (i = 0; i < n; ++i) {
         printf("  %" IGRAPH_PRId ": ", i);
@@ -71,16 +71,20 @@ void print_vector_int_list(const igraph_vector_int_list_t *v) {
     printf("}\n");
 }
 
-/* Print elements of a matrix. Use brackets to make it clear when a vector has size zero. */
 void print_matrix_format(const igraph_matrix_t *m, FILE *f, const char *format) {
-    igraph_integer_t i, j, nrow = igraph_matrix_nrow(m), ncol = igraph_matrix_ncol(m);
+    print_matrix_format_indent(m, f, format, "");
+}
+
+/* Print elements of a matrix. Use brackets to make it clear when a vector has size zero. */
+void print_matrix_format_indent(const igraph_matrix_t *m, FILE *f, const char *format, const char *indent) {
+    igraph_int_t i, j, nrow = igraph_matrix_nrow(m), ncol = igraph_matrix_ncol(m);
     if (nrow == 0 || ncol == 0) {
         /* When the matrix is empty, output the dimensions */
-        fprintf(f, "[ %" IGRAPH_PRId "-by-%" IGRAPH_PRId" ]\n", nrow, ncol);
+        fprintf(f, "%s[ %" IGRAPH_PRId "-by-%" IGRAPH_PRId" ]\n", indent, nrow, ncol);
         return;
     }
     for (i = 0; i < nrow; i++) {
-        fprintf(f, i == 0 ? "[" : " ");
+        fprintf(f, i == 0 ? "%s[" : "%s ", indent);
         for (j = 0; j < ncol; j++) {
             fprintf(f, " ");
             print_real(f, MATRIX(*m, i, j), format);
@@ -90,11 +94,15 @@ void print_matrix_format(const igraph_matrix_t *m, FILE *f, const char *format) 
 }
 
 void print_matrix(const igraph_matrix_t *m) {
-    print_matrix_format(m, stdout, "%8g");
+    print_matrix_indent(m, "");
+}
+
+void print_matrix_indent(const igraph_matrix_t *m, const char *indent) {
+    print_matrix_format_indent(m, stdout, "%8g", indent);
 }
 
 void print_matrix_int(const igraph_matrix_int_t *m) {
-    igraph_integer_t i, j, nrow = igraph_matrix_int_nrow(m), ncol = igraph_matrix_int_ncol(m);
+    igraph_int_t i, j, nrow = igraph_matrix_int_nrow(m), ncol = igraph_matrix_int_ncol(m);
     if (nrow == 0 || ncol == 0) {
         /* When the matrix is empty, output the dimensions */
         printf("[ %" IGRAPH_PRId "-by-%" IGRAPH_PRId" ]\n", nrow, ncol);
@@ -118,9 +126,9 @@ void print_matrix_round(const igraph_matrix_t *m) {
 
 void print_matrix_complex_round(const igraph_matrix_complex_t *m) {
 
-    igraph_integer_t nr = igraph_matrix_complex_nrow(m);
-    igraph_integer_t nc = igraph_matrix_complex_ncol(m);
-    igraph_integer_t i, j;
+    igraph_int_t nr = igraph_matrix_complex_nrow(m);
+    igraph_int_t nc = igraph_matrix_complex_ncol(m);
+    igraph_int_t i, j;
     for (i = 0; i < nr; i++) {
         for (j = 0; j < nc; j++) {
             igraph_complex_t z = MATRIX(*m, i, j);
@@ -133,13 +141,29 @@ void print_matrix_complex_round(const igraph_matrix_complex_t *m) {
     }
 }
 
+void print_matrix_list(const igraph_matrix_list_t *m) {
+    igraph_int_t i, n = igraph_matrix_list_size(m);
+    printf("{\n");
+    for (i = 0; i < n; ++i) {
+        igraph_matrix_t *mat = igraph_matrix_list_get_ptr(m, i);
+        if (igraph_matrix_nrow(mat) < 2) {
+            printf("  %2" IGRAPH_PRId ": ", i);
+            print_matrix(mat);
+        } else {
+            printf("  %2" IGRAPH_PRId ":\n", i);
+            print_matrix_indent(mat, "      ");
+        }
+    }
+    printf("}\n");
+}
+
 /* Print an adjacency list. Use brackets around each vector and also use
  * brackets around the entire adjacency list to make it clear when the list
  * is empty.
  */
 void print_adjlist(const igraph_adjlist_t *adjlist) {
-    igraph_integer_t vcount = igraph_adjlist_size(adjlist);
-    igraph_integer_t i;
+    igraph_int_t vcount = igraph_adjlist_size(adjlist);
+    igraph_int_t i;
 
     printf("{\n");
     for (i = 0; i < vcount; ++i) {
@@ -157,26 +181,23 @@ void print_graph(const igraph_t *graph) {
 /* Print a graph with edge weights from a vector. Use brackets to make it
  * obvious when the edge list is empty. */
 void print_weighted_graph(const igraph_t *graph, const igraph_vector_t* weights) {
-    igraph_integer_t ecount = igraph_ecount(graph);
-    igraph_integer_t vcount = igraph_vcount(graph);
-    igraph_integer_t i;
+    igraph_int_t ecount = igraph_ecount(graph);
+    igraph_int_t vcount = igraph_vcount(graph);
+    igraph_int_t i;
 
     printf("directed: %s\n", igraph_is_directed(graph) ? "true" : "false");
     printf("vcount: %" IGRAPH_PRId "\n", vcount);
     printf("edges: {\n");
     for (i=0; i < ecount; ++i) {
+        printf(
+            "%" IGRAPH_PRId " %" IGRAPH_PRId,
+            IGRAPH_FROM(graph, i), IGRAPH_TO(graph, i)
+        );
         if (weights) {
-            printf(
-                "%" IGRAPH_PRId " %" IGRAPH_PRId ": %g\n",
-                IGRAPH_FROM(graph, i), IGRAPH_TO(graph, i),
-                VECTOR(*weights)[i]
-            );
-        } else {
-            printf(
-                "%" IGRAPH_PRId " %" IGRAPH_PRId "\n",
-                IGRAPH_FROM(graph, i), IGRAPH_TO(graph, i)
-            );
+            printf(": ");
+            print_real(stdout, VECTOR(*weights)[i], "%g");
         }
+        printf("\n");
     }
     printf("}\n");
 }
@@ -184,9 +205,9 @@ void print_weighted_graph(const igraph_t *graph, const igraph_vector_t* weights)
 /* Print a graph with edge weights from an edge attribute. Use brackets to make
  * it obvious when the edge list is empty. */
 void print_weighted_graph_attr(const igraph_t *graph, const char* attr) {
-    igraph_integer_t ecount = igraph_ecount(graph);
-    igraph_integer_t vcount = igraph_vcount(graph);
-    igraph_integer_t i;
+    igraph_int_t ecount = igraph_ecount(graph);
+    igraph_int_t vcount = igraph_vcount(graph);
+    igraph_int_t i;
 
     printf("directed: %s\n", igraph_is_directed(graph) ? "true" : "false");
     printf("vcount: %" IGRAPH_PRId "\n", vcount);
@@ -205,8 +226,8 @@ void print_weighted_graph_attr(const igraph_t *graph, const char* attr) {
  * is empty.
  */
 void print_inclist(const igraph_inclist_t *inclist) {
-    igraph_integer_t vcount = igraph_inclist_size(inclist);
-    igraph_integer_t i;
+    igraph_int_t vcount = igraph_inclist_size(inclist);
+    igraph_int_t i;
 
     printf("{\n");
     for (i = 0; i < vcount; ++i) {
@@ -221,8 +242,8 @@ void print_inclist(const igraph_inclist_t *inclist) {
  * is empty.
  */
 void print_lazy_adjlist(igraph_lazy_adjlist_t *adjlist) {
-    igraph_integer_t vcount = igraph_lazy_adjlist_size(adjlist);
-    igraph_integer_t i;
+    igraph_int_t vcount = igraph_lazy_adjlist_size(adjlist);
+    igraph_int_t i;
 
     printf("{\n");
     for (i = 0; i < vcount; ++i) {
@@ -237,8 +258,8 @@ void print_lazy_adjlist(igraph_lazy_adjlist_t *adjlist) {
  * is empty.
  */
 void print_lazy_inclist(igraph_lazy_inclist_t *inclist) {
-    igraph_integer_t vcount = igraph_lazy_inclist_size(inclist);
-    igraph_integer_t i;
+    igraph_int_t vcount = igraph_lazy_inclist_size(inclist);
+    igraph_int_t i;
 
     printf("{\n");
     for (i = 0; i < vcount; ++i) {
@@ -249,29 +270,29 @@ void print_lazy_inclist(igraph_lazy_inclist_t *inclist) {
 }
 
 /* Edge comparison function used for sorting in print_graph_canon(). */
-int edge_compare(const void *e1, const void *e2) {
-    const igraph_integer_t *edge1 = (const igraph_integer_t *) e1;
-    const igraph_integer_t *edge2 = (const igraph_integer_t *) e2;
-    if (edge1[0] < edge2[0]) {
+int edge_compare(void *pedges, const void *pi1, const void *pi2) {
+    const igraph_int_t i1 = * (const igraph_int_t *) pi1;
+    const igraph_int_t i2 = * (const igraph_int_t *) pi2;
+    const igraph_vector_int_t *edges = (const igraph_vector_int_t *) pedges;
+    if (VECTOR(*edges)[2*i1] < VECTOR(*edges)[2*i2]) {
         return -1;
-    } else if (edge1[0] > edge2[0]) {
+    } else if (VECTOR(*edges)[2*i1] > VECTOR(*edges)[2*i2]) {
         return 1;
-    } else if (edge1[1] < edge2[1]) {
+    } else if (VECTOR(*edges)[2*i1+1] < VECTOR(*edges)[2*i2+1]) {
         return -1;
-    } else if (edge1[1] > edge2[1]) {
+    } else if (VECTOR(*edges)[2*i1+1] > VECTOR(*edges)[2*i2+1]) {
         return 1;
     } else {
         return 0;
     }
 }
 
-/* Print a graph using a sorted edge list. Other than sorting (i.e. canonicalizing) the edge list,
- * this function is identical to print_graph(). */
-void print_graph_canon(const igraph_t *graph) {
-    igraph_integer_t ecount = igraph_ecount(graph);
-    igraph_integer_t vcount = igraph_vcount(graph);
-    igraph_integer_t i;
-    igraph_vector_int_t edges;
+/* Print a weighted graph using a sorted edge list. Other than sorting (i.e. canonicalizing)
+ * the edge list, this function is identical to print_graph(). */
+void print_weighted_graph_canon(const igraph_t *graph, const igraph_vector_t *weights) {
+    igraph_int_t ecount = igraph_ecount(graph);
+    igraph_int_t vcount = igraph_vcount(graph);
+    igraph_vector_int_t edges, idx;
 
     printf("directed: %s\n", igraph_is_directed(graph) ? "true" : "false");
     printf("vcount: %" IGRAPH_PRId "\n", vcount);
@@ -283,31 +304,46 @@ void print_graph_canon(const igraph_t *graph) {
     /* If the graph is undirected, we make sure that the first vertex of undirected edges
      * is always the one with the lower ID. */
     if (! igraph_is_directed(graph)) {
-        for (i=0; i < ecount; ++i) {
+        for (igraph_int_t i=0; i < ecount; i++) {
             if (VECTOR(edges)[2*i] > VECTOR(edges)[2*i+1]) {
-                igraph_integer_t tmp = VECTOR(edges)[2*i];
+                igraph_int_t tmp = VECTOR(edges)[2*i];
                 VECTOR(edges)[2*i] = VECTOR(edges)[2*i+1];
                 VECTOR(edges)[2*i+1] = tmp;
             }
         }
     }
 
-    /* Sort the edge list */
-    igraph_qsort(&VECTOR(edges)[0], ecount, 2*sizeof(igraph_integer_t), &edge_compare);
+    igraph_vector_int_init_range(&idx, 0, igraph_ecount(graph));
 
-    for (i=0; i < ecount; ++i) {
-        printf("%" IGRAPH_PRId " %" IGRAPH_PRId "\n", VECTOR(edges)[2*i], VECTOR(edges)[2*i+1]);
+    /* Sort the edge list */
+    igraph_qsort_r(&VECTOR(idx)[0], ecount, sizeof(igraph_int_t), &edges, &edge_compare);
+
+    for (igraph_int_t i=0; i < ecount; i++) {
+        const igraph_int_t k = VECTOR(idx)[i];
+        printf("%" IGRAPH_PRId " %" IGRAPH_PRId, VECTOR(edges)[2*k], VECTOR(edges)[2*k+1]);
+        if (weights) {
+            printf(": ");
+            print_real(stdout, VECTOR(*weights)[k], "%g");
+        }
+        printf("\n");
     }
 
-    igraph_vector_int_destroy(&edges);
-
     printf("}\n");
+
+    igraph_vector_int_destroy(&idx);
+    igraph_vector_int_destroy(&edges);
+}
+
+/* Print a graph using a sorted edge list. Other than sorting (i.e. canonicalizing)
+ * the edge list, this function is identical to print_graph(). */
+void print_graph_canon(const igraph_t *graph) {
+    print_weighted_graph_canon(graph, NULL);
 }
 
 /* Print a vector, ensuring that the first nonzero element is positive. */
 void print_vector_first_nonzero_element_positive(const igraph_vector_t *vector, const char* format) {
     igraph_vector_t copy;
-    igraph_integer_t i, n;
+    igraph_int_t i, n;
 
     igraph_vector_init_copy(&copy, vector);
 
@@ -334,7 +370,7 @@ void print_vector_first_nonzero_element_positive(const igraph_vector_t *vector, 
  * part has a positive real part. */
 void print_vector_complex_first_nonzero_real_part_positive(const igraph_vector_complex_t *vector) {
     igraph_vector_complex_t copy;
-    igraph_integer_t i, n;
+    igraph_int_t i, n;
 
     igraph_vector_complex_init_copy(&copy, vector);
 
@@ -364,7 +400,7 @@ void print_vector_complex_first_nonzero_real_part_positive(const igraph_vector_c
  * positive. */
 void print_matrix_first_row_positive(const igraph_matrix_t *matrix, const char* format) {
     igraph_matrix_t copy;
-    igraph_integer_t i, j, nrow, ncol;
+    igraph_int_t i, j, nrow, ncol;
 
     igraph_matrix_init_copy(&copy, matrix);
 
@@ -394,7 +430,7 @@ void print_matrix_first_row_positive(const igraph_matrix_t *matrix, const char* 
  * part in each column has a positive real part. */
 void print_matrix_complex_first_row_positive(const igraph_matrix_complex_t *matrix) {
     igraph_matrix_complex_t copy;
-    igraph_integer_t i, j, nrow, ncol;
+    igraph_int_t i, j, nrow, ncol;
     igraph_complex_t z;
     char buf[256];
     size_t len;
@@ -450,8 +486,8 @@ void print_matrix_complex_first_row_positive(const igraph_matrix_complex_t *matr
     igraph_matrix_complex_destroy(&copy);
 }
 
-void matrix_init_int_row_major(igraph_matrix_t *mat, igraph_integer_t nrow, igraph_integer_t ncol, const int *elem) {
-    igraph_integer_t c, r;
+void matrix_init_int_row_major(igraph_matrix_t *mat, igraph_int_t nrow, igraph_int_t ncol, const int *elem) {
+    igraph_int_t c, r;
     size_t i_elem = 0;
     igraph_matrix_init(mat, nrow, ncol);
     for (r = 0; r < nrow; r++) {
@@ -462,8 +498,8 @@ void matrix_init_int_row_major(igraph_matrix_t *mat, igraph_integer_t nrow, igra
     }
 }
 
-void matrix_int_init_int_row_major(igraph_matrix_int_t *mat, igraph_integer_t nrow, igraph_integer_t ncol, const int *elem) {
-    igraph_integer_t c, r;
+void matrix_int_init_int_row_major(igraph_matrix_int_t *mat, igraph_int_t nrow, igraph_int_t ncol, const int *elem) {
+    igraph_int_t c, r;
     size_t i_elem = 0;
     igraph_matrix_int_init(mat, nrow, ncol);
     for (r = 0; r < nrow; r++) {
@@ -474,8 +510,8 @@ void matrix_int_init_int_row_major(igraph_matrix_int_t *mat, igraph_integer_t nr
     }
 }
 
-void matrix_init_real_row_major(igraph_matrix_t *mat, igraph_integer_t nrow, igraph_integer_t ncol, const igraph_real_t *elem) {
-    igraph_integer_t c, r;
+void matrix_init_real_row_major(igraph_matrix_t *mat, igraph_int_t nrow, igraph_int_t ncol, const igraph_real_t *elem) {
+    igraph_int_t c, r;
     size_t i_elem = 0;
     igraph_matrix_init(mat, nrow, ncol);
     for (r = 0; r < nrow; r++) {
@@ -487,8 +523,8 @@ void matrix_init_real_row_major(igraph_matrix_t *mat, igraph_integer_t nrow, igr
 }
 
 void matrix_chop(igraph_matrix_t *mat, igraph_real_t cutoff) {
-    igraph_integer_t nelems = igraph_matrix_nrow(mat) * igraph_matrix_ncol(mat);
-    for (igraph_integer_t i = 0; i < nelems; i++) {
+    igraph_int_t nelems = igraph_matrix_nrow(mat) * igraph_matrix_ncol(mat);
+    for (igraph_int_t i = 0; i < nelems; i++) {
         if (fabs(VECTOR(mat->data)[i]) < cutoff) {
             VECTOR(mat->data)[i] = 0;
         }
@@ -496,8 +532,8 @@ void matrix_chop(igraph_matrix_t *mat, igraph_real_t cutoff) {
 }
 
 void vector_chop(igraph_vector_t *vec, igraph_real_t cutoff) {
-    igraph_integer_t nelems = igraph_vector_size(vec);
-    for (igraph_integer_t i = 0; i < nelems; i++) {
+    igraph_int_t nelems = igraph_vector_size(vec);
+    for (igraph_int_t i = 0; i < nelems; i++) {
         if (fabs(VECTOR(*vec)[i]) < cutoff) {
             VECTOR(*vec)[i] = 0;
         }
@@ -508,9 +544,9 @@ void vector_chop(igraph_vector_t *vec, igraph_real_t cutoff) {
 void print_attributes(const igraph_t *g) {
     igraph_vector_int_t gtypes, vtypes, etypes;
     igraph_strvector_t gnames, vnames, enames;
-    igraph_integer_t i;
+    igraph_int_t i;
 
-    igraph_integer_t j;
+    igraph_int_t j;
 
     igraph_vector_int_init(&gtypes, 0);
     igraph_vector_int_init(&vtypes, 0);
@@ -593,14 +629,14 @@ void record_last_warning(const char *reason, const char *file, int line) {
 
 void print_bitset(const igraph_bitset_t* bitset) {
     printf("(");
-    for (igraph_integer_t i = bitset->size - 1; i >= 0; --i) {
+    for (igraph_int_t i = bitset->size - 1; i >= 0; --i) {
         printf(" %d", !!IGRAPH_BIT_TEST(*bitset, i));
     }
     printf(" )\n");
 }
 
 void print_bitset_list(const igraph_bitset_list_t *v) {
-    igraph_integer_t i, n = igraph_bitset_list_size(v);
+    igraph_int_t i, n = igraph_bitset_list_size(v);
     printf("{\n");
     for (i = 0; i < n; ++i) {
         printf("  %" IGRAPH_PRId ": ", i);

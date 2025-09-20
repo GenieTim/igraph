@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2021  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -57,7 +57,7 @@ int main(void) {
     VERIFY_FINALLY_STACK();
 
     printf("Edge out of range.\n");
-    CHECK_ERROR(igraph_is_mutual(&g_lm, &result, igraph_ess_1(100), true), IGRAPH_EINVAL);
+    CHECK_ERROR(igraph_is_mutual(&g_lm, &result, igraph_ess_1(100), true), IGRAPH_EINVEID);
 
     igraph_destroy(&g_0);
     igraph_destroy(&g_lm);

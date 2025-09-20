@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2006-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -61,7 +60,7 @@ static igraph_error_t igraph_i_community_spinglass_orig(
         igraph_real_t *temperature,
         igraph_vector_int_t *membership,
         igraph_vector_int_t *csize,
-        igraph_integer_t spins,
+        igraph_int_t spins,
         igraph_bool_t parupdate,
         igraph_real_t starttemp,
         igraph_real_t stoptemp,
@@ -76,7 +75,7 @@ static igraph_error_t igraph_i_community_spinglass_negative(
         igraph_real_t *temperature,
         igraph_vector_int_t *membership,
         igraph_vector_int_t *csize,
-        igraph_integer_t spins,
+        igraph_int_t spins,
         igraph_bool_t parupdate,
         igraph_real_t starttemp,
         igraph_real_t stoptemp,
@@ -171,7 +170,7 @@ igraph_error_t igraph_community_spinglass(const igraph_t *graph,
                                igraph_real_t *temperature,
                                igraph_vector_int_t *membership,
                                igraph_vector_int_t *csize,
-                               igraph_integer_t spins,
+                               igraph_int_t spins,
                                igraph_bool_t parupdate,
                                igraph_real_t starttemp,
                                igraph_real_t stoptemp,
@@ -212,7 +211,7 @@ static igraph_error_t igraph_i_community_spinglass_orig(
         igraph_real_t *temperature,
         igraph_vector_int_t *membership,
         igraph_vector_int_t *csize,
-        igraph_integer_t spins,
+        igraph_int_t spins,
         igraph_bool_t parupdate,
         igraph_real_t starttemp,
         igraph_real_t stoptemp,
@@ -220,8 +219,8 @@ static igraph_error_t igraph_i_community_spinglass_orig(
         igraph_spincomm_update_t update_rule,
         igraph_real_t gamma) {
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t changes, runs;
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t changes, runs;
     igraph_bool_t use_weights = false;
     bool zeroT;
     double kT, acc, prob;
@@ -303,9 +302,6 @@ static igraph_error_t igraph_i_community_spinglass_orig(
 
     PottsModel pm(&net, spins, update_rule);
 
-    /* initialize the random number generator */
-    RNG_BEGIN();
-
     if ((stoptemp == 0.0) && (starttemp == 0.0)) {
         zeroT = true;
     } else {
@@ -355,8 +351,6 @@ static igraph_error_t igraph_i_community_spinglass_orig(
 
     pm.WriteClusters(modularity, temperature, csize, membership, kT, gamma);
 
-    RNG_END();
-
     return IGRAPH_SUCCESS;
 }
 
@@ -387,11 +381,12 @@ static igraph_error_t igraph_i_community_spinglass_orig(
  *     cohesion index of the community will be stored here.
  * \param adhesion Pointer to a real variable, if not \c NULL the
  *     adhesion index of the community will be stored here.
- * \param inner_links Pointer to an integer, if not \c NULL the
- *     number of edges within the community is stored here.
- * \param outer_links Pointer to an integer, if not \c NULL the
+ * \param inner_links Pointer to a real, if not \c NULL the
+ *     number of edges within the community (or the sum of their weights)
+ *     is stored here.
+ * \param outer_links Pointer to a real, if not \c NULL the
  *     number of edges between the community and the rest of the graph
- *     will be stored here.
+ *     (or the sum of their weights) will be stored here.
  * \param spins The number of spins to use, this can be higher than
  *    the actual number of clusters in the network, in which case some
  *    clusters will contain zero vertices.
@@ -422,13 +417,13 @@ static igraph_error_t igraph_i_community_spinglass_orig(
 
 igraph_error_t igraph_community_spinglass_single(const igraph_t *graph,
                                       const igraph_vector_t *weights,
-                                      igraph_integer_t vertex,
+                                      igraph_int_t vertex,
                                       igraph_vector_int_t *community,
                                       igraph_real_t *cohesion,
                                       igraph_real_t *adhesion,
-                                      igraph_integer_t *inner_links,
-                                      igraph_integer_t *outer_links,
-                                      igraph_integer_t spins,
+                                      igraph_real_t *inner_links,
+                                      igraph_real_t *outer_links,
+                                      igraph_int_t spins,
                                       igraph_spincomm_update_t update_rule,
                                       igraph_real_t gamma) {
     IGRAPH_HANDLE_EXCEPTIONS(
@@ -472,9 +467,6 @@ igraph_error_t igraph_community_spinglass_single(const igraph_t *graph,
 
         PottsModel pm(&net, spins, update_rule);
 
-        /* initialize the random number generator */
-        RNG_BEGIN();
-
         /* to be expected, if we want to find the community around a particular node*/
         /* the initial conf is needed, because otherwise,
            the degree of the nodes is not in the weight property, stupid!!! */
@@ -482,8 +474,6 @@ igraph_error_t igraph_community_spinglass_single(const igraph_t *graph,
         snprintf(startnode, sizeof(startnode) / sizeof(startnode[0]), "%" IGRAPH_PRId "", vertex + 1);
         pm.FindCommunityFromStart(gamma, startnode, community,
                                    cohesion, adhesion, inner_links, outer_links);
-
-        RNG_END();
     );
 
     return IGRAPH_SUCCESS;
@@ -496,7 +486,7 @@ static igraph_error_t igraph_i_community_spinglass_negative(
         igraph_real_t *temperature,
         igraph_vector_int_t *membership,
         igraph_vector_int_t *csize,
-        igraph_integer_t spins,
+        igraph_int_t spins,
         igraph_bool_t parupdate,
         igraph_real_t starttemp,
         igraph_real_t stoptemp,
@@ -505,8 +495,8 @@ static igraph_error_t igraph_i_community_spinglass_negative(
         igraph_real_t gamma,
         igraph_real_t gamma_minus) {
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t runs;
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t runs;
     igraph_bool_t use_weights = false;
     bool zeroT;
     double kT, acc;
@@ -602,9 +592,6 @@ static igraph_error_t igraph_i_community_spinglass_negative(
 
     PottsModelN pm(&net, spins, directed);
 
-    /* initialize the random number generator */
-    RNG_BEGIN();
-
     if ((stoptemp == 0.0) && (starttemp == 0.0)) {
         zeroT = true;
     } else {
@@ -640,8 +627,6 @@ static igraph_error_t igraph_i_community_spinglass_negative(
     igraph_matrix_destroy(&normalized_adhesion);
     igraph_matrix_destroy(&adhesion);
     IGRAPH_FINALLY_CLEAN(2);
-
-    RNG_END();
 
     return IGRAPH_SUCCESS;
 }

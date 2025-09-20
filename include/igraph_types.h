@@ -1,8 +1,6 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
-   Copyright (C) 2003-2012  Gabor Csardi <csardi.gabor@gmail.com>
-   334 Harvard street, Cambridge, MA 02139 USA
+   igraph library.
+   Copyright (C) 2003-2025  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,10 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc.,  51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301 USA
-
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef IGRAPH_TYPES_H
@@ -26,7 +21,7 @@
 
 #include "igraph_decls.h"
 
-__BEGIN_DECLS
+IGRAPH_BEGIN_C_DECLS
 
 #ifdef __cplusplus
     #define __STDC_FORMAT_MACROS   /* needed for PRId32 and PRId64 from inttypes.h on Linux */
@@ -45,14 +40,16 @@ __BEGIN_DECLS
 #if !defined(IGRAPH_INTEGER_SIZE)
 #  error "igraph integer size not defined; check the value of IGRAPH_INTEGER_SIZE when compiling"
 #elif IGRAPH_INTEGER_SIZE == 64
-typedef int64_t igraph_integer_t;
+typedef int64_t igraph_int_t;
 typedef uint64_t igraph_uint_t;
 #elif IGRAPH_INTEGER_SIZE == 32
-typedef int32_t igraph_integer_t;
+typedef int32_t igraph_int_t;
 typedef uint32_t igraph_uint_t;
 #else
 #  error "Invalid igraph integer size; check the value of IGRAPH_INTEGER_SIZE when compiling"
 #endif
+
+typedef igraph_int_t igraph_integer_t;
 
 typedef double igraph_real_t;
 
@@ -61,7 +58,7 @@ typedef double igraph_real_t;
  * See igraph_config.h for more info */
 typedef IGRAPH_BOOL_TYPE igraph_bool_t;
 
-/* printf format specifier for igraph_integer_t */
+/* printf format specifier for igraph_int_t */
 #if IGRAPH_INTEGER_SIZE == 64
 #  define IGRAPH_PRId PRId64
 #  define IGRAPH_PRIu PRIu64
@@ -70,7 +67,7 @@ typedef IGRAPH_BOOL_TYPE igraph_bool_t;
 #  define IGRAPH_PRIu PRIu32
 #endif
 
-/* maximum and minimum allowed values for igraph_integer_t */
+/* maximum and minimum allowed values for igraph_int_t */
 #if IGRAPH_INTEGER_SIZE == 64
 #  define IGRAPH_INTEGER_MAX INT64_MAX
 #  define IGRAPH_INTEGER_MIN INT64_MIN
@@ -138,19 +135,8 @@ IGRAPH_EXPORT int igraph_real_fprintf_precise(FILE *file, igraph_real_t val);
 IGRAPH_EXPORT int igraph_real_snprintf_precise(char *str, size_t size, igraph_real_t val);
 
 #define IGRAPH_INFINITY ((double)INFINITY)
-#define IGRAPH_POSINFINITY IGRAPH_INFINITY
-#define IGRAPH_NEGINFINITY (-IGRAPH_INFINITY)
-
-IGRAPH_DEPRECATED IGRAPH_EXPORT int igraph_finite(double x);
-#define IGRAPH_FINITE(x) igraph_finite(x)
-
-IGRAPH_DEPRECATED IGRAPH_EXPORT int igraph_is_nan(double x);
-IGRAPH_DEPRECATED IGRAPH_EXPORT int igraph_is_inf(double x);
-IGRAPH_DEPRECATED IGRAPH_EXPORT int igraph_is_posinf(double x);
-IGRAPH_DEPRECATED IGRAPH_EXPORT int igraph_is_neginf(double x);
-
 #define IGRAPH_NAN ((double)NAN)
 
-__END_DECLS
+IGRAPH_END_C_DECLS
 
 #endif

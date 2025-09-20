@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2021  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -25,10 +24,8 @@ int main(void) {
     igraph_t g;
     igraph_real_t  modularity, temperature;
     igraph_vector_int_t membership, csize;
-    /* igraph_integer_t i; */
     igraph_real_t cohesion, adhesion;
-    igraph_integer_t inner_links;
-    igraph_integer_t outer_links;
+    igraph_real_t inner_links, outer_links;
 
     igraph_rng_seed(igraph_rng_default(), 137);
 
@@ -313,7 +310,7 @@ int main(void) {
     printf("Modularity: %g\nTemperature: %g\n", modularity, temperature);
     print_vector_int(&membership);
 
-    const igraph_integer_t half_ec = igraph_ecount(&g) / 2;
+    const igraph_int_t half_ec = igraph_ecount(&g) / 2;
     igraph_vector_range(&weights, -half_ec, igraph_ecount(&g) - half_ec);
     printf("Negative implementation:\n");
     igraph_community_spinglass(&g,

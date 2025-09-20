@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2021  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@ int main(void) {
     igraph_vector_int_list_t paths, paths_edge;
     igraph_vector_int_t nrgeo;
     igraph_vector_t weights;
-    igraph_integer_t from, to;
+    igraph_int_t from, to;
 
     igraph_vector_int_list_init(&paths, 0);
     igraph_vector_int_list_init(&paths_edge, 0);
@@ -46,7 +46,7 @@ int main(void) {
 
     from = 0; to = 0;
 
-    igraph_get_all_shortest_paths(&graph, &paths, NULL, &nrgeo, from, igraph_vss_1(to), IGRAPH_ALL);
+    igraph_get_all_shortest_paths(&graph, NULL, &paths, NULL, &nrgeo, from, igraph_vss_1(to), IGRAPH_ALL);
 
     printf("Vertex paths:\n");
     print_vector_int_list(&paths);
@@ -55,7 +55,7 @@ int main(void) {
     printf("\nSingleton graph, weighted\n");
     igraph_vector_resize(&weights, igraph_ecount(&graph));
     igraph_vector_fill(&weights, 1);
-    igraph_get_all_shortest_paths_dijkstra(&graph, &paths, NULL, &nrgeo, from, igraph_vss_1(to), &weights, IGRAPH_ALL);
+    igraph_get_all_shortest_paths(&graph, &weights, &paths, NULL, &nrgeo, from, igraph_vss_1(to), IGRAPH_ALL);
 
     printf("Vertex paths:\n");
     print_vector_int_list(&paths);
@@ -68,7 +68,7 @@ int main(void) {
 
     from = 0; to = 1;
 
-    igraph_get_all_shortest_paths(&graph, &paths, &paths_edge, &nrgeo, from, igraph_vss_1(to), IGRAPH_ALL);
+    igraph_get_all_shortest_paths(&graph, NULL, &paths, &paths_edge, &nrgeo, from, igraph_vss_1(to), IGRAPH_ALL);
 
     printf("Vertex paths:\n");
     print_vector_int_list(&paths);
@@ -88,7 +88,7 @@ int main(void) {
     from = 0; to = 4;
 
     printf("\nUnweighted\n");
-    igraph_get_all_shortest_paths(&graph, &paths, &paths_edge, &nrgeo, from, igraph_vss_1(to), IGRAPH_ALL);
+    igraph_get_all_shortest_paths(&graph, NULL, &paths, &paths_edge, &nrgeo, from, igraph_vss_1(to), IGRAPH_ALL);
 
     printf("Vertex paths:\n");
     print_vector_int_list(&paths);
@@ -100,7 +100,7 @@ int main(void) {
     igraph_vector_resize(&weights, igraph_ecount(&graph));
     igraph_vector_fill(&weights, 1.5); /* constant weights */
 
-    igraph_get_all_shortest_paths_dijkstra(&graph, &paths, &paths_edge, &nrgeo, from, igraph_vss_1(to), &weights, IGRAPH_ALL);
+    igraph_get_all_shortest_paths(&graph, &weights, &paths, &paths_edge, &nrgeo, from, igraph_vss_1(to), IGRAPH_ALL);
 
     printf("Vertex paths:\n");
     print_vector_int_list(&paths);
@@ -112,7 +112,7 @@ int main(void) {
     VECTOR(weights)[1] = 3.0; /* create path with one more hop, but equal weighted length */
     VECTOR(weights)[4] = 2.0; /* break symmetry on pair of parallel edges */
 
-    igraph_get_all_shortest_paths_dijkstra(&graph, &paths, &paths_edge, &nrgeo, from, igraph_vss_1(to), &weights, IGRAPH_ALL);
+    igraph_get_all_shortest_paths(&graph, &weights, &paths, &paths_edge, &nrgeo, from, igraph_vss_1(to), IGRAPH_ALL);
 
     printf("Vertex paths:\n");
     print_vector_int_list(&paths);
@@ -139,8 +139,8 @@ int main(void) {
     from = 6;
     printf("From: %" IGRAPH_PRId ", to: all.\n", from);
 
-    igraph_vector_view(&weights, weights_raw, sizeof(weights_raw) / sizeof(igraph_real_t));
-    igraph_get_all_shortest_paths_dijkstra(&graph, &paths, &paths_edge, &nrgeo, from, igraph_vss_all(), &weights, IGRAPH_ALL);
+    weights = igraph_vector_view(weights_raw, sizeof(weights_raw) / sizeof(igraph_real_t));
+    igraph_get_all_shortest_paths(&graph, &weights, &paths, &paths_edge, &nrgeo, from, igraph_vss_all(), IGRAPH_ALL);
 
     printf("Vertex paths:\n");
     print_vector_int_list(&paths);

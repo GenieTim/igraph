@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2020-2022  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 #include "test_utilities.h"
 
 #define TEST_GRAPH(name) \
-    igraph_count_automorphisms(&graph, NULL, IGRAPH_BLISS_F, &info); \
+    igraph_count_automorphisms_bliss(&graph, NULL, IGRAPH_BLISS_F, &info); \
     printf("%s: %s\n", name, info.group_size); \
     igraph_free(info.group_size); \
     igraph_destroy(&graph);

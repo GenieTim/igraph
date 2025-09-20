@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2006-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -30,7 +29,7 @@ int main(void) {
 
     igraph_t ring, g;
     igraph_graph_list_t complist;
-    igraph_integer_t i;
+    igraph_int_t i;
 
     igraph_graph_list_init(&complist, 0);
 

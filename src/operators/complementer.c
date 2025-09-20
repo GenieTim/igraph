@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2006-2020 The igraph development team
 
    This program is free software; you can redistribute it and/or modify
@@ -51,11 +50,11 @@
 igraph_error_t igraph_complementer(igraph_t *res, const igraph_t *graph,
                         igraph_bool_t loops) {
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
     igraph_vector_int_t edges;
     igraph_vector_int_t neis;
-    igraph_integer_t i, j;
-    igraph_integer_t zero = 0, *limit;
+    igraph_int_t i, j;
+    igraph_int_t zero = 0, *limit;
 
     IGRAPH_VECTOR_INT_INIT_FINALLY(&edges, 0);
     IGRAPH_VECTOR_INT_INIT_FINALLY(&neis, 0);
@@ -68,7 +67,7 @@ igraph_error_t igraph_complementer(igraph_t *res, const igraph_t *graph,
 
     for (i = 0; i < no_of_nodes; i++) {
         IGRAPH_ALLOW_INTERRUPTION();
-        IGRAPH_CHECK(igraph_neighbors(graph, &neis, i, IGRAPH_OUT));
+        IGRAPH_CHECK(igraph_neighbors(graph, &neis, i, IGRAPH_OUT, IGRAPH_LOOPS, IGRAPH_MULTIPLE));
         if (loops) {
             for (j = no_of_nodes - 1; j >= *limit; j--) {
                 if (igraph_vector_int_empty(&neis) || j > igraph_vector_int_tail(&neis)) {
@@ -95,8 +94,7 @@ igraph_error_t igraph_complementer(igraph_t *res, const igraph_t *graph,
     IGRAPH_CHECK(igraph_create(res, &edges, no_of_nodes, igraph_is_directed(graph)));
     igraph_vector_int_destroy(&edges);
     igraph_vector_int_destroy(&neis);
-    IGRAPH_I_ATTRIBUTE_DESTROY(res);
-    IGRAPH_I_ATTRIBUTE_COPY(res, graph, /*graph=*/true, /*vertex=*/true, /*edge=*/false);
+    IGRAPH_CHECK(igraph_i_attribute_copy(res, graph, true, true, /* edges= */ false));
     IGRAPH_FINALLY_CLEAN(2);
     return IGRAPH_SUCCESS;
 }

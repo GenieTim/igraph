@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2006-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -24,9 +23,11 @@
 #include <igraph.h>
 
 int main(void) {
-
     igraph_t g;
     igraph_strvector_t names;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     igraph_set_attribute_table(&igraph_cattribute_table);
 
@@ -46,7 +47,7 @@ int main(void) {
     igraph_strvector_push_back(&names, "H");
     igraph_strvector_push_back(&names, "I");
     igraph_strvector_push_back(&names, "J");
-    SETVASV(&g, "id", &names);
+    SETVASV(&g, "name", &names);
     igraph_strvector_destroy(&names);
 
     /* save the graph with vertex names */

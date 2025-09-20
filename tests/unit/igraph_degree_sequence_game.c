@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2021  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -21,13 +21,13 @@
 #include "test_utilities.h"
 
 igraph_bool_t compare_degrees(const igraph_vector_int_t* expected, const igraph_vector_int_t *observed) {
-    const igraph_integer_t n = igraph_vector_int_size(expected);
+    const igraph_int_t n = igraph_vector_int_size(expected);
 
     if (igraph_vector_int_size(observed) != n) {
         return false;
     }
 
-    for (igraph_integer_t i = 0; i < n; i++) {
+    for (igraph_int_t i = 0; i < n; i++) {
         if (VECTOR(*expected)[i] != VECTOR(*observed)[i]) {
             return false;
         }
@@ -38,19 +38,20 @@ igraph_bool_t compare_degrees(const igraph_vector_int_t* expected, const igraph_
 
 int main(void) {
     igraph_t g, rg;
-    igraph_vector_int_t outdeg, indeg, empty;
-    igraph_vector_int_t degrees, rg_degrees;
     igraph_bool_t is_simple, is_connected;
 
-    const igraph_integer_t outarr[] = {2, 3, 2, 3, 3, 3, 3, 1, 4, 4};
-    const igraph_integer_t inarr[]  = {3, 6, 2, 0, 2, 2, 4, 3, 3, 3};
+    const igraph_int_t outarr[] = {2, 3, 2, 3, 3, 3, 3, 1, 4, 4};
+    const igraph_int_t inarr[]  = {3, 6, 2, 0, 2, 2, 4, 3, 3, 3};
 
-    const igraph_integer_t n = sizeof(outarr) / sizeof(outarr[0]);
+    const igraph_int_t n = sizeof(outarr) / sizeof(outarr[0]);
+
+    const igraph_vector_int_t outdeg = igraph_vector_int_view(outarr, n);
+    const igraph_vector_int_t indeg = igraph_vector_int_view(inarr,  n);
+
+    igraph_vector_int_t empty;
+    igraph_vector_int_t degrees, rg_degrees;
 
     igraph_rng_seed(igraph_rng_default(), 333);
-
-    igraph_vector_int_view(&outdeg, outarr, n);
-    igraph_vector_int_view(&indeg,  inarr,  n);
 
     igraph_vector_int_init(&empty, 0);
 
@@ -104,7 +105,7 @@ int main(void) {
     IGRAPH_ASSERT(! igraph_is_directed(&g));
     IGRAPH_ASSERT(igraph_vcount(&g) == n);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     IGRAPH_ASSERT(is_simple);
 
     igraph_degree(&g, &degrees, igraph_vss_all(), IGRAPH_ALL, IGRAPH_LOOPS);
@@ -116,12 +117,12 @@ int main(void) {
     IGRAPH_ASSERT(igraph_vcount(&g) == 0);
     igraph_destroy(&g);
 
-    igraph_erdos_renyi_game_gnm(&rg, 2000, 2000, IGRAPH_UNDIRECTED, IGRAPH_NO_LOOPS);
+    igraph_erdos_renyi_game_gnm(&rg, 2000, 2000, IGRAPH_UNDIRECTED, IGRAPH_SIMPLE_SW, IGRAPH_EDGE_UNLABELED);
     igraph_degree(&rg, &rg_degrees, igraph_vss_all(), IGRAPH_ALL, IGRAPH_LOOPS);
 
     igraph_degree_sequence_game(&g, &rg_degrees, NULL, IGRAPH_DEGSEQ_CONFIGURATION_SIMPLE);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     IGRAPH_ASSERT(is_simple);
 
     igraph_degree(&g, &degrees, igraph_vss_all(), IGRAPH_ALL, IGRAPH_LOOPS);
@@ -138,7 +139,7 @@ int main(void) {
     IGRAPH_ASSERT(igraph_is_directed(&g));
     IGRAPH_ASSERT(igraph_vcount(&g) == n);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     IGRAPH_ASSERT(is_simple);
 
     igraph_degree(&g, &degrees, igraph_vss_all(), IGRAPH_OUT, IGRAPH_LOOPS);
@@ -161,7 +162,7 @@ int main(void) {
     IGRAPH_ASSERT(! igraph_is_directed(&g));
     IGRAPH_ASSERT(igraph_vcount(&g) == n);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     IGRAPH_ASSERT(is_simple);
 
     igraph_degree(&g, &degrees, igraph_vss_all(), IGRAPH_ALL, IGRAPH_LOOPS);
@@ -181,7 +182,7 @@ int main(void) {
     IGRAPH_ASSERT(igraph_is_directed(&g));
     IGRAPH_ASSERT(igraph_vcount(&g) == n);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     IGRAPH_ASSERT(is_simple);
 
     igraph_degree(&g, &degrees, igraph_vss_all(), IGRAPH_OUT, IGRAPH_LOOPS);
@@ -201,7 +202,7 @@ int main(void) {
 
     igraph_degree_sequence_game(&g, &outdeg, NULL, IGRAPH_DEGSEQ_EDGE_SWITCHING_SIMPLE);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     IGRAPH_ASSERT(is_simple);
 
     igraph_degree(&g, &degrees, igraph_vss_all(), IGRAPH_OUT, IGRAPH_LOOPS);
@@ -214,7 +215,7 @@ int main(void) {
 
     igraph_degree_sequence_game(&g, &outdeg, &indeg, IGRAPH_DEGSEQ_EDGE_SWITCHING_SIMPLE);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     IGRAPH_ASSERT(is_simple);
 
     igraph_degree(&g, &degrees, igraph_vss_all(), IGRAPH_OUT, IGRAPH_LOOPS);
@@ -233,7 +234,7 @@ int main(void) {
     IGRAPH_ASSERT(! igraph_is_directed(&g));
     IGRAPH_ASSERT(igraph_vcount(&g) == n);
 
-    igraph_is_simple(&g, &is_simple);
+    igraph_is_simple(&g, &is_simple, IGRAPH_DIRECTED);
     IGRAPH_ASSERT(is_simple);
 
     igraph_is_connected(&g, &is_connected, IGRAPH_WEAK);

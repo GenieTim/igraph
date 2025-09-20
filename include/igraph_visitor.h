@@ -1,8 +1,6 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
-   Copyright (C) 2009-2012  Gabor Csardi <csardi.gabor@gmail.com>
-   334 Harvard street, Cambridge, MA 02139 USA
+   igraph library.
+   Copyright (C) 2009-2025  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,10 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc.,  51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301 USA
-
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef IGRAPH_VISITOR_H
@@ -30,7 +25,7 @@
 #include "igraph_types.h"
 #include "igraph_datatype.h"
 
-__BEGIN_DECLS
+IGRAPH_BEGIN_C_DECLS
 
 /* -------------------------------------------------- */
 /* Visitor-like functions                             */
@@ -72,15 +67,15 @@ __BEGIN_DECLS
  */
 
 typedef igraph_error_t igraph_bfshandler_t(const igraph_t *graph,
-        igraph_integer_t vid,
-        igraph_integer_t pred,
-        igraph_integer_t succ,
-        igraph_integer_t rank,
-        igraph_integer_t dist,
+        igraph_int_t vid,
+        igraph_int_t pred,
+        igraph_int_t succ,
+        igraph_int_t rank,
+        igraph_int_t dist,
         void *extra);
 
 IGRAPH_EXPORT igraph_error_t igraph_bfs(const igraph_t *graph,
-                             igraph_integer_t root, const igraph_vector_int_t *roots,
+                             igraph_int_t root, const igraph_vector_int_t *roots,
                              igraph_neimode_t mode, igraph_bool_t unreachable,
                              const igraph_vector_int_t *restricted,
                              igraph_vector_int_t *order, igraph_vector_int_t *rank,
@@ -89,7 +84,7 @@ IGRAPH_EXPORT igraph_error_t igraph_bfs(const igraph_t *graph,
                              igraph_vector_int_t *dist, igraph_bfshandler_t *callback,
                              void *extra);
 
-IGRAPH_EXPORT igraph_error_t igraph_bfs_simple(const igraph_t *graph, igraph_integer_t root, igraph_neimode_t mode,
+IGRAPH_EXPORT igraph_error_t igraph_bfs_simple(const igraph_t *graph, igraph_int_t root, igraph_neimode_t mode,
                                     igraph_vector_int_t *order, igraph_vector_int_t *layers,
                                     igraph_vector_int_t *parents);
 
@@ -122,11 +117,11 @@ IGRAPH_EXPORT igraph_error_t igraph_bfs_simple(const igraph_t *graph, igraph_int
  */
 
 typedef igraph_error_t igraph_dfshandler_t(const igraph_t *graph,
-        igraph_integer_t vid,
-        igraph_integer_t dist,
+        igraph_int_t vid,
+        igraph_int_t dist,
         void *extra);
 
-IGRAPH_EXPORT igraph_error_t igraph_dfs(const igraph_t *graph, igraph_integer_t root,
+IGRAPH_EXPORT igraph_error_t igraph_dfs(const igraph_t *graph, igraph_int_t root,
                              igraph_neimode_t mode, igraph_bool_t unreachable,
                              igraph_vector_int_t *order,
                              igraph_vector_int_t *order_out, igraph_vector_int_t *parents,
@@ -134,6 +129,6 @@ IGRAPH_EXPORT igraph_error_t igraph_dfs(const igraph_t *graph, igraph_integer_t 
                              igraph_dfshandler_t *out_callback,
                              void *extra);
 
-__END_DECLS
+IGRAPH_END_C_DECLS
 
 #endif

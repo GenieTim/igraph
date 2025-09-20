@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2009-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -51,9 +50,7 @@ int main(void) {
     igraph_sparsemat_t A, B, C, D;
     igraph_vector_t v, w, x, y;
     igraph_matrix_t M, N, O;
-    igraph_integer_t i;
-
-    RNG_BEGIN();
+    igraph_int_t i;
 
     /* Matrix-vector product */
 #define NROW 10
@@ -62,8 +59,8 @@ int main(void) {
     igraph_matrix_init(&M, NROW, NCOL);
     igraph_sparsemat_init(&A, NROW, NCOL, EDGES);
     for (i = 0; i < EDGES; i++) {
-        igraph_integer_t r = RNG_INTEGER(0, NROW - 1);
-        igraph_integer_t c = RNG_INTEGER(0, NCOL - 1);
+        igraph_int_t r = RNG_INTEGER(0, NROW - 1);
+        igraph_int_t c = RNG_INTEGER(0, NCOL - 1);
         igraph_real_t value = RNG_INTEGER(1, 5);
         MATRIX(M, r, c) = MATRIX(M, r, c) + value;
         igraph_sparsemat_entry(&A, r, c, value);
@@ -108,8 +105,8 @@ int main(void) {
     igraph_matrix_init(&M, NROW_A, NCOL_A);
     igraph_sparsemat_init(&A, NROW_A, NCOL_A, EDGES_A);
     for (i = 0; i < EDGES_A; i++) {
-        igraph_integer_t r = RNG_INTEGER(0, NROW_A - 1);
-        igraph_integer_t c = RNG_INTEGER(0, NCOL_A - 1);
+        igraph_int_t r = RNG_INTEGER(0, NROW_A - 1);
+        igraph_int_t c = RNG_INTEGER(0, NCOL_A - 1);
         igraph_real_t value = RNG_INTEGER(1, 5);
         MATRIX(M, r, c) = MATRIX(M, r, c) + value;
         igraph_sparsemat_entry(&A, r, c, value);
@@ -120,8 +117,8 @@ int main(void) {
     igraph_matrix_init(&N, NROW_B, NCOL_B);
     igraph_sparsemat_init(&B, NROW_B, NCOL_B, EDGES_B);
     for (i = 0; i < EDGES_B; i++) {
-        igraph_integer_t r = RNG_INTEGER(0, NROW_B - 1);
-        igraph_integer_t c = RNG_INTEGER(0, NCOL_B - 1);
+        igraph_int_t r = RNG_INTEGER(0, NROW_B - 1);
+        igraph_int_t c = RNG_INTEGER(0, NCOL_B - 1);
         igraph_real_t value = RNG_INTEGER(1, 5);
         MATRIX(N, r, c) = MATRIX(N, r, c) + value;
         igraph_sparsemat_entry(&B, r, c, value);
@@ -145,8 +142,6 @@ int main(void) {
     igraph_matrix_destroy(&O);
 
     VERIFY_FINALLY_STACK();
-
-    RNG_END();
 
     return 0;
 }

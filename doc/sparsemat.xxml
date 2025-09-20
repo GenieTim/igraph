@@ -18,7 +18,6 @@
 <!-- doxrox-include igraph_sparsemat_init_eye -->
 <!-- doxrox-include igraph_sparsemat_realloc -->
 <!-- doxrox-include igraph_sparsemat_destroy -->
-<!-- doxrox-include igraph_sparsemat_view -->
 </section>
 
 <section id="query-properties-of-a-sparse-matrix"><title>Query properties of a sparse matrix</title>
@@ -98,19 +97,12 @@
 </section>
 
 <section id="conversion-to-other-data-types"><title>Conversion to other data types</title>
-<!-- doxrox-include igraph_sparsemat -->
 <!-- doxrox-include igraph_matrix_as_sparsemat -->
 <!-- doxrox-include igraph_sparsemat_as_matrix -->
 </section>
 
 <section id="writing-to-a-file-or-to-the-screen"><title>Writing to a file, or to the screen</title>
 <!-- doxrox-include igraph_sparsemat_print -->
-</section>
-
-<section id="sparse-matrix-deprecated"><title>Deprecated functions</title>
-<!-- doxrox-include igraph_sparsemat_copy -->
-<!-- doxrox-include igraph_sparsemat_diag -->
-<!-- doxrox-include igraph_sparsemat_eye -->
 </section>
 
 </section>

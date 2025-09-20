@@ -1,8 +1,6 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
-   Copyright (C) 2009-2012  Gabor Csardi <csardi.gabor@gmail.com>
-   334 Harvard street, Cambridge, MA 02139 USA
+   igraph library.
+   Copyright (C) 2009-2025  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,28 +13,24 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc.,  51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301 USA
-
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef IGRAPH_LAYOUT_H
 #define IGRAPH_LAYOUT_H
 
 #include "igraph_decls.h"
-
 #include "igraph_constants.h"
 #include "igraph_datatype.h"
 #include "igraph_error.h"
 #include "igraph_iterators.h"
+#include "igraph_matrix.h"
 #include "igraph_matrix_list.h"
 #include "igraph_types.h"
 #include "igraph_vector.h"
 #include "igraph_vector_ptr.h"
-#include "igraph_matrix.h"
 
-__BEGIN_DECLS
+IGRAPH_BEGIN_C_DECLS
 
 /**
  * \section about_layouts
@@ -58,12 +52,12 @@ IGRAPH_EXPORT igraph_error_t igraph_layout_random(const igraph_t *graph, igraph_
 IGRAPH_EXPORT igraph_error_t igraph_layout_circle(const igraph_t *graph, igraph_matrix_t *res,
                                        igraph_vs_t order);
 IGRAPH_EXPORT igraph_error_t igraph_layout_star(const igraph_t *graph, igraph_matrix_t *res,
-                                     igraph_integer_t center, const igraph_vector_int_t *order);
-IGRAPH_EXPORT igraph_error_t igraph_layout_grid(const igraph_t *graph, igraph_matrix_t *res, igraph_integer_t width);
+                                     igraph_int_t center, const igraph_vector_int_t *order);
+IGRAPH_EXPORT igraph_error_t igraph_layout_grid(const igraph_t *graph, igraph_matrix_t *res, igraph_int_t width);
 IGRAPH_EXPORT igraph_error_t igraph_layout_fruchterman_reingold(const igraph_t *graph,
                                                      igraph_matrix_t *res,
                                                      igraph_bool_t use_seed,
-                                                     igraph_integer_t niter,
+                                                     igraph_int_t niter,
                                                      igraph_real_t start_temp,
                                                      igraph_layout_grid_t grid,
                                                      const igraph_vector_t *weights,
@@ -73,16 +67,16 @@ IGRAPH_EXPORT igraph_error_t igraph_layout_fruchterman_reingold(const igraph_t *
                                                      const igraph_vector_t *maxy);
 
 IGRAPH_EXPORT igraph_error_t igraph_layout_kamada_kawai(const igraph_t *graph, igraph_matrix_t *res,
-                                             igraph_bool_t use_seed, igraph_integer_t maxiter,
+                                             igraph_bool_t use_seed, igraph_int_t maxiter,
                                              igraph_real_t epsilon, igraph_real_t kkconst,
                                              const igraph_vector_t *weights,
                                              const igraph_vector_t *minx, const igraph_vector_t *maxx,
                                              const igraph_vector_t *miny, const igraph_vector_t *maxy);
 
 IGRAPH_EXPORT igraph_error_t igraph_layout_lgl(const igraph_t *graph, igraph_matrix_t *res,
-                                    igraph_integer_t maxiter, igraph_real_t maxdelta,
+                                    igraph_int_t maxiter, igraph_real_t maxdelta,
                                     igraph_real_t area, igraph_real_t coolexp,
-                                    igraph_real_t repulserad, igraph_real_t cellsize, igraph_integer_t root);
+                                    igraph_real_t repulserad, igraph_real_t cellsize, igraph_int_t root);
 IGRAPH_EXPORT igraph_error_t igraph_layout_reingold_tilford(const igraph_t *graph, igraph_matrix_t *res,
                                                  igraph_neimode_t mode,
                                                  const igraph_vector_int_t *roots,
@@ -92,19 +86,19 @@ IGRAPH_EXPORT igraph_error_t igraph_layout_reingold_tilford_circular(const igrap
                                                           igraph_neimode_t mode,
                                                           const igraph_vector_int_t *roots,
                                                           const igraph_vector_int_t *rootlevel);
-IGRAPH_EXPORT igraph_error_t igraph_layout_sugiyama(const igraph_t *graph, igraph_matrix_t *res,
-                                         igraph_t *extd_graph, igraph_vector_int_t *extd_to_orig_eids,
-                                         const igraph_vector_int_t* layers, igraph_real_t hgap,
-                                         igraph_real_t vgap, igraph_integer_t maxiter, const igraph_vector_t *weights);
+IGRAPH_EXPORT igraph_error_t igraph_layout_sugiyama(
+    const igraph_t *graph, igraph_matrix_t *res, igraph_matrix_list_t *routing,
+    const igraph_vector_int_t* layers, igraph_real_t hgap,
+    igraph_real_t vgap, igraph_int_t maxiter, const igraph_vector_t *weights);
 
 IGRAPH_EXPORT igraph_error_t igraph_layout_random_3d(const igraph_t *graph, igraph_matrix_t *res);
 IGRAPH_EXPORT igraph_error_t igraph_layout_sphere(const igraph_t *graph, igraph_matrix_t *res);
 IGRAPH_EXPORT igraph_error_t igraph_layout_grid_3d(const igraph_t *graph, igraph_matrix_t *res,
-                                        igraph_integer_t width, igraph_integer_t height);
+                                        igraph_int_t width, igraph_int_t height);
 IGRAPH_EXPORT igraph_error_t igraph_layout_fruchterman_reingold_3d(const igraph_t *graph,
                                                         igraph_matrix_t *res,
                                                         igraph_bool_t use_seed,
-                                                        igraph_integer_t niter,
+                                                        igraph_int_t niter,
                                                         igraph_real_t start_temp,
                                                         const igraph_vector_t *weights,
                                                         const igraph_vector_t *minx,
@@ -115,7 +109,7 @@ IGRAPH_EXPORT igraph_error_t igraph_layout_fruchterman_reingold_3d(const igraph_
                                                         const igraph_vector_t *maxz);
 
 IGRAPH_EXPORT igraph_error_t igraph_layout_kamada_kawai_3d(const igraph_t *graph, igraph_matrix_t *res,
-                                                igraph_bool_t use_seed, igraph_integer_t maxiter,
+                                                igraph_bool_t use_seed, igraph_int_t maxiter,
                                                 igraph_real_t epsilon, igraph_real_t kkconst,
                                                 const igraph_vector_t *weights,
                                                 const igraph_vector_t *minx, const igraph_vector_t *maxx,
@@ -123,7 +117,7 @@ IGRAPH_EXPORT igraph_error_t igraph_layout_kamada_kawai_3d(const igraph_t *graph
                                                 const igraph_vector_t *minz, const igraph_vector_t *maxz);
 
 IGRAPH_EXPORT igraph_error_t igraph_layout_graphopt(const igraph_t *graph,
-                                         igraph_matrix_t *res, igraph_integer_t niter,
+                                         igraph_matrix_t *res, igraph_int_t niter,
                                          igraph_real_t node_charge, igraph_real_t node_mass,
                                          igraph_real_t spring_length,
                                          igraph_real_t spring_constant,
@@ -131,30 +125,30 @@ IGRAPH_EXPORT igraph_error_t igraph_layout_graphopt(const igraph_t *graph,
                                          igraph_bool_t use_seed);
 
 IGRAPH_EXPORT igraph_error_t igraph_layout_mds(const igraph_t *graph, igraph_matrix_t *res,
-                                    const igraph_matrix_t *dist, igraph_integer_t dim);
+                                    const igraph_matrix_t *dist, igraph_int_t dim);
 
 IGRAPH_EXPORT igraph_error_t igraph_layout_bipartite(const igraph_t *graph,
                                           const igraph_vector_bool_t *types,
                                           igraph_matrix_t *res, igraph_real_t hgap,
-                                          igraph_real_t vgap, igraph_integer_t maxiter);
+                                          igraph_real_t vgap, igraph_int_t maxiter);
 
-IGRAPH_EXPORT igraph_error_t igraph_layout_umap(const igraph_t *graph,
+IGRAPH_EXPERIMENTAL IGRAPH_EXPORT igraph_error_t igraph_layout_umap(const igraph_t *graph,
                                                 igraph_matrix_t *res,
                                                 igraph_bool_t use_seed,
                                                 const igraph_vector_t *distances,
                                                 igraph_real_t min_dist,
-                                                igraph_integer_t epochs,
+                                                igraph_int_t epochs,
                                                 igraph_bool_t distances_are_weights);
 
-IGRAPH_EXPORT igraph_error_t igraph_layout_umap_3d(const igraph_t *graph,
+IGRAPH_EXPERIMENTAL IGRAPH_EXPORT igraph_error_t igraph_layout_umap_3d(const igraph_t *graph,
                                                 igraph_matrix_t *res,
                                                 igraph_bool_t use_seed,
                                                 const igraph_vector_t *distances,
                                                 igraph_real_t min_dist,
-                                                igraph_integer_t epochs,
+                                                igraph_int_t epochs,
                                                 igraph_bool_t distances_are_weights);
 
-IGRAPH_EXPORT igraph_error_t igraph_layout_umap_compute_weights(const igraph_t *graph,
+IGRAPH_EXPERIMENTAL IGRAPH_EXPORT igraph_error_t igraph_layout_umap_compute_weights(const igraph_t *graph,
                                                 const igraph_vector_t *distances,
                                                 igraph_vector_t *weights);
 
@@ -198,27 +192,27 @@ IGRAPH_EXPORT igraph_error_t igraph_layout_umap_compute_weights(const igraph_t *
 
 typedef struct igraph_layout_drl_options_t {
     igraph_real_t    edge_cut;
-    igraph_integer_t init_iterations;
+    igraph_int_t init_iterations;
     igraph_real_t    init_temperature;
     igraph_real_t    init_attraction;
     igraph_real_t    init_damping_mult;
-    igraph_integer_t liquid_iterations;
+    igraph_int_t liquid_iterations;
     igraph_real_t    liquid_temperature;
     igraph_real_t    liquid_attraction;
     igraph_real_t    liquid_damping_mult;
-    igraph_integer_t expansion_iterations;
+    igraph_int_t expansion_iterations;
     igraph_real_t    expansion_temperature;
     igraph_real_t    expansion_attraction;
     igraph_real_t    expansion_damping_mult;
-    igraph_integer_t cooldown_iterations;
+    igraph_int_t cooldown_iterations;
     igraph_real_t    cooldown_temperature;
     igraph_real_t    cooldown_attraction;
     igraph_real_t    cooldown_damping_mult;
-    igraph_integer_t crunch_iterations;
+    igraph_int_t crunch_iterations;
     igraph_real_t    crunch_temperature;
     igraph_real_t    crunch_attraction;
     igraph_real_t    crunch_damping_mult;
-    igraph_integer_t simmer_iterations;
+    igraph_int_t simmer_iterations;
     igraph_real_t    simmer_temperature;
     igraph_real_t    simmer_attraction;
     igraph_real_t    simmer_damping_mult;
@@ -262,13 +256,13 @@ IGRAPH_EXPORT igraph_error_t igraph_layout_merge_dla(const igraph_vector_ptr_t *
                                           igraph_matrix_t *res);
 
 IGRAPH_EXPORT igraph_error_t igraph_layout_gem(const igraph_t *graph, igraph_matrix_t *res,
-                                    igraph_bool_t use_seed, igraph_integer_t maxiter,
+                                    igraph_bool_t use_seed, igraph_int_t maxiter,
                                     igraph_real_t temp_max, igraph_real_t temp_min,
                                     igraph_real_t temp_init);
 
 IGRAPH_EXPORT igraph_error_t igraph_layout_davidson_harel(const igraph_t *graph, igraph_matrix_t *res,
-                                               igraph_bool_t use_seed, igraph_integer_t maxiter,
-                                               igraph_integer_t fineiter, igraph_real_t cool_fact,
+                                               igraph_bool_t use_seed, igraph_int_t maxiter,
+                                               igraph_int_t fineiter, igraph_real_t cool_fact,
                                                igraph_real_t weight_node_dist, igraph_real_t weight_border,
                                                igraph_real_t weight_edge_lengths,
                                                igraph_real_t weight_edge_crossings,
@@ -294,6 +288,6 @@ IGRAPH_EXPORT igraph_error_t igraph_roots_for_tree_layout(
 
 IGRAPH_EXPORT igraph_error_t igraph_layout_align(const igraph_t *graph, igraph_matrix_t *layout);
 
-__END_DECLS
+IGRAPH_END_C_DECLS
 
 #endif

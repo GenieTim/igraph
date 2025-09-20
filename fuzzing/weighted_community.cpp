@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2024  The igraph development team
 
    This program is free software; you can redistribute it and/or modify
@@ -52,7 +52,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
         igraph_vector_int_t membership, membership2, iv, iv2;
         igraph_vector_t mv, v;
         igraph_real_t m, r;
-        igraph_integer_t i;
+        igraph_int_t i;
         igraph_bool_t b;
 
         /* Limit graph size for the sake of performance. */
@@ -85,10 +85,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
             // Ignore edge directions in label propagation for now, as on some weighted graphs the
             // algorithm seems to never complete. See https://github.com/igraph/igraph/issues/2561
-            igraph_community_label_propagation(&graph, &membership, IGRAPH_ALL, &weights, NULL, NULL);
+            igraph_community_label_propagation(&graph, &membership, IGRAPH_ALL, &weights, NULL, NULL, IGRAPH_LPA_FAST);
+            igraph_community_label_propagation(&graph, &membership, IGRAPH_ALL, &weights, NULL, NULL, IGRAPH_LPA_RETENTION);
+            igraph_community_label_propagation(&graph, &membership, IGRAPH_ALL, &weights, NULL, NULL, IGRAPH_LPA_DOMINANCE);
 
             igraph_community_walktrap(&graph, &weights, 3, &merges, &mv, &membership);
-            igraph_community_edge_betweenness(&graph, &iv, &v, &merges, &iv2, &mv, &membership2, IGRAPH_DIRECTED, &weights);
+            igraph_community_edge_betweenness(&graph, &iv, &v, &merges, &iv2, &mv, &membership2, IGRAPH_DIRECTED, &weights, NULL);
+            igraph_community_leiden(&graph, &weights, NULL, NULL, 1.5, 0.01, false, 2, &membership, &i, &r);
 
             // Take the opportunity to run functions that can use the output of community detection,
             // potentially with weights.
@@ -131,7 +134,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
             // Compute 'length' vector for community_voronoi()
             igraph_vector_update(&v, &weights);
-            for (igraph_integer_t i=0; i < igraph_vector_size(&v); i++) {
+            for (igraph_int_t i=0; i < igraph_vector_size(&v); i++) {
                 VECTOR(v)[i] = 1 / (1 + VECTOR(v)[i]);
             }
             igraph_community_voronoi(&graph, &membership, &iv, &m, &v, &weights, IGRAPH_OUT, 1.0);
@@ -140,7 +143,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
             EANV(&graph, "weight", &weights);
 
             igraph_community_fastgreedy(&graph, &weights, &merges, &mv, &membership);
-            igraph_community_leiden(&graph, &weights, NULL, 1.5, 0.01, false, 2, &membership, &i, &r);
+            igraph_community_leiden(&graph, &weights, NULL, NULL, 1.5, 0.01, false, 2, &membership, &i, &r);
             igraph_community_multilevel(&graph, &weights, 0.8, &membership, &im, &mv);
 
             // community_spinglass() only works on connected graphs

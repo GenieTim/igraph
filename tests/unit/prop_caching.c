@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2022  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -61,6 +61,14 @@ igraph_error_t is_forest(const igraph_t* graph, igraph_bool_t* result) {
     return igraph_is_forest(graph, result, /* roots = */ NULL, IGRAPH_ALL);
 }
 
+igraph_error_t is_simple(const igraph_t* graph, igraph_bool_t* result) {
+    return igraph_is_simple(graph, result, IGRAPH_DIRECTED);
+}
+
+igraph_error_t is_simple_ignoring_directions(const igraph_t* graph, igraph_bool_t* result) {
+    return igraph_is_simple(graph, result, IGRAPH_UNDIRECTED);
+}
+
 void validate_properties(const igraph_t* graph) {
     igraph_bool_t result, cached_result, recalculated_result;
 
@@ -74,11 +82,12 @@ void validate_properties(const igraph_t* graph) {
     IGRAPH_ASSERT(recalculated_result == cached_result); \
 }
 
-    CHECK(igraph_is_simple);
     CHECK(igraph_has_loop);
     CHECK(igraph_has_multiple);
     CHECK(igraph_is_dag);
     CHECK(is_forest);
+    CHECK(is_simple);
+    CHECK(is_simple_ignoring_directions);
     CHECK(is_weakly_connected);
     CHECK(is_strongly_connected);
     CHECK(has_mutual_edge);

@@ -1,6 +1,6 @@
 /*
-   IGraph library.
-   Copyright (C) 2024  The igraph development team <igraph@igraph.org>
+   igraph library.
+   Copyright (C) 2024-2025  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,13 +25,13 @@
 #include "igraph_error.h"
 #include "igraph_vector.h"
 
-__BEGIN_DECLS
+IGRAPH_BEGIN_C_DECLS
 
 IGRAPH_EXPORT igraph_error_t igraph_reachability(
             const igraph_t *graph,
             igraph_vector_int_t *membership,
             igraph_vector_int_t *csize,
-            igraph_integer_t *no_of_components,
+            igraph_int_t *no_of_components,
             igraph_bitset_list_t *reach,
             igraph_neimode_t mode);
 
@@ -44,6 +44,6 @@ IGRAPH_EXPORT igraph_error_t igraph_count_reachable(
 IGRAPH_EXPORT igraph_error_t igraph_transitive_closure(const igraph_t *graph,
                                                        igraph_t* closure);
 
-__END_DECLS
+IGRAPH_END_C_DECLS
 
 #endif // IGRAPH_REACHABILITY_H

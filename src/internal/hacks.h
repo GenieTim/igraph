@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2003-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -35,7 +34,7 @@
 
 #include <stdlib.h>
 
-__BEGIN_DECLS
+IGRAPH_BEGIN_C_DECLS
 
 #ifndef HAVE_STRDUP
     #define strdup igraph_i_strdup
@@ -68,6 +67,6 @@ __BEGIN_DECLS
  */
 #define IGRAPH_STATIC_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))
 
-__END_DECLS
+IGRAPH_END_C_DECLS
 
 #endif

@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2022  The igraph development team
 
    This program is free software; you can redistribute it and/or modify
@@ -26,6 +25,9 @@ int main(void) {
     igraph_t g;
     igraph_vector_t degree;
     igraph_plfit_result_t model;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     /* Seed random number generator to ensure reproducibility. */
     igraph_rng_seed(igraph_rng_default(), 42);

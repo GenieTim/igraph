@@ -1,7 +1,6 @@
-/* -*- mode: C -*-  */
 /* vim:set ts=4 sts=4 sw=4 et: */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2011-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge MA, 02139 USA
 
@@ -29,22 +28,25 @@ int main(void) {
     igraph_t g;
     igraph_real_t radius;
 
+    /* Initialize the library. */
+    igraph_setup();
+
     igraph_star(&g, 10, IGRAPH_STAR_UNDIRECTED, 0);
-    igraph_radius(&g, &radius, IGRAPH_OUT);
+    igraph_radius(&g, NULL, &radius, IGRAPH_OUT);
     if (radius != 1) {
         return 1;
     }
     igraph_destroy(&g);
 
     igraph_star(&g, 10, IGRAPH_STAR_OUT, 0);
-    igraph_radius(&g, &radius, IGRAPH_ALL);
+    igraph_radius(&g, NULL, &radius, IGRAPH_ALL);
     if (radius != 1) {
         return 2;
     }
     igraph_destroy(&g);
 
     igraph_star(&g, 10, IGRAPH_STAR_OUT, 0);
-    igraph_radius(&g, &radius, IGRAPH_OUT);
+    igraph_radius(&g, NULL, &radius, IGRAPH_OUT);
     if (radius != 0) {
         return 3;
     }

@@ -33,6 +33,8 @@
 <!-- doxrox-include igraph_vector_get_ptr -->
 <!-- doxrox-include igraph_vector_set -->
 <!-- doxrox-include igraph_vector_tail -->
+<!-- doxrox-include igraph_vector_index -->
+<!-- doxrox-include igraph_vector_index_in_place -->
 </section>
 
 <section id="vector-views"><title>Vector views</title>
@@ -142,6 +144,7 @@
 <!-- doxrox-include igraph_vector_intersect_sorted -->
 <!-- doxrox-include igraph_vector_intersection_size_sorted -->
 <!-- doxrox-include igraph_vector_difference_sorted -->
+<!-- doxrox-include igraph_vector_difference_and_intersection_sorted -->
 </section>
 
 <section id="about-vector-ptr">
@@ -152,30 +155,22 @@
 <!-- doxrox-include igraph_vector_ptr_free_all -->
 <!-- doxrox-include igraph_vector_ptr_destroy_all -->
 <!-- doxrox-include igraph_vector_ptr_size -->
+<!-- doxrox-include igraph_vector_ptr_capacity -->
 <!-- doxrox-include igraph_vector_ptr_clear -->
+<!-- doxrox-include igraph_vector_ptr_reserve -->
+<!-- doxrox-include igraph_vector_ptr_resize -->
+<!-- doxrox-include igraph_vector_ptr_resize_min -->
 <!-- doxrox-include igraph_vector_ptr_push_back -->
 <!-- doxrox-include igraph_vector_ptr_pop_back -->
 <!-- doxrox-include igraph_vector_ptr_insert -->
 <!-- doxrox-include igraph_vector_ptr_get -->
 <!-- doxrox-include igraph_vector_ptr_set -->
-<!-- doxrox-include igraph_vector_ptr_resize -->
 <!-- doxrox-include igraph_vector_ptr_sort -->
 <!-- doxrox-include igraph_vector_ptr_sort_ind -->
 <!-- doxrox-include igraph_vector_ptr_permute -->
 <!-- doxrox-include igraph_vector_ptr_get_item_destructor -->
 <!-- doxrox-include igraph_vector_ptr_set_item_destructor -->
 <!-- doxrox-include IGRAPH_VECTOR_PTR_SET_ITEM_DESTRUCTOR -->
-</section>
-
-<section id="vector-deprecated"><title>Deprecated functions</title>
-<!-- doxrox-include igraph_vector_copy -->
-<!-- doxrox-include igraph_vector_e -->
-<!-- doxrox-include igraph_vector_e_ptr -->
-<!-- doxrox-include igraph_vector_init_seq -->
-<!-- doxrox-include igraph_vector_ptr_copy -->
-<!-- doxrox-include igraph_vector_ptr_e -->
-<!-- doxrox-include igraph_vector_qsort_ind -->
-<!-- doxrox-include igraph_vector_binsearch2 -->
 </section>
 
 </section>

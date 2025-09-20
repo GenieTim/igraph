@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2022 The igraph development team
 
    This program is free software; you can redistribute it and/or modify
@@ -29,7 +28,7 @@ int main(void) {
     igraph_vector_int_list_t list, list2;
     igraph_vector_int_t v;
     igraph_vector_int_t* v_ptr;
-    igraph_integer_t i;
+    igraph_int_t i;
 
     printf("Initialise empty vector list\n");
     igraph_vector_int_list_init(&list, 0);

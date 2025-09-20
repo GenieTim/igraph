@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2021  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -29,7 +28,7 @@ int main(void) {
 
     // Bipartite
     //==========================================================
-    igraph_bipartite_game_gnm(&graph, NULL, 10, 10, 20, IGRAPH_UNDIRECTED, IGRAPH_ALL);
+    igraph_bipartite_game_gnm(&graph, NULL, 10, 10, 20, IGRAPH_UNDIRECTED, IGRAPH_ALL, IGRAPH_SIMPLE_SW, IGRAPH_EDGE_UNLABELED);
     igraph_is_perfect(&graph, &is_perfect);
     IGRAPH_ASSERT(is_perfect);
     igraph_destroy(&graph);
@@ -123,7 +122,7 @@ int main(void) {
     igraph_destroy(&graph);
 
     // Test directed paths
-    igraph_bipartite_game_gnm(&graph, NULL, 10, 10, 20, IGRAPH_DIRECTED, IGRAPH_ALL);
+    igraph_bipartite_game_gnm(&graph, NULL, 10, 10, 20, IGRAPH_DIRECTED, IGRAPH_ALL, IGRAPH_SIMPLE_SW, IGRAPH_EDGE_UNLABELED);
     ehandler = igraph_set_error_handler(igraph_error_handler_printignore);
     IGRAPH_ASSERT(igraph_is_perfect(&graph, &is_perfect) == IGRAPH_EINVAL);
     igraph_set_error_handler(ehandler);

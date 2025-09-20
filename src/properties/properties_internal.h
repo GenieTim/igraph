@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2011-2021  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -24,11 +23,11 @@
 #include "igraph_decls.h"
 #include "igraph_iterators.h"
 
-__BEGIN_DECLS
+IGRAPH_BEGIN_C_DECLS
 
 igraph_error_t igraph_i_trans4_al_simplify(igraph_adjlist_t *al,
                                            const igraph_vector_int_t *rank);
 
-__END_DECLS
+IGRAPH_END_C_DECLS
 
 #endif

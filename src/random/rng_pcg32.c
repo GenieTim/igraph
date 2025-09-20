@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2022  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -22,8 +22,6 @@
 #include "igraph_types.h"
 
 #include "pcg/pcg_variants.h"
-
-#include "config.h" /* IGRAPH_THREAD_LOCAL */
 
 /* The original implementation of the 32-bit PCG random number generator in this
  * file was obtained from https://github.com/imneme/pcg-c
@@ -115,10 +113,10 @@ const igraph_rng_type_t igraph_rngtype_pcg32 = {
 
 static pcg32_random_t igraph_i_rng_default_state = PCG32_INITIALIZER;
 
-IGRAPH_THREAD_LOCAL igraph_rng_t igraph_i_rng_default = {
+igraph_rng_t igraph_i_rng_default = {
     addr(igraph_rngtype_pcg32),
     addr(igraph_i_rng_default_state),
-    /* is_seeded = */ true
+    /* is_seeded = */ false
 };
 
 #undef addr

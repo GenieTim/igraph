@@ -1,7 +1,5 @@
-/* -*- mode: C -*-  */
-/* vim:set ts=4 sw=4 sts=4 et: */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2003-2021 The igraph development team
 
    This program is free software; you can redistribute it and/or modify
@@ -36,7 +34,7 @@
  * them to trees.
  */
 
-static igraph_error_t igraph_i_tree_game_prufer(igraph_t *graph, igraph_integer_t n, igraph_bool_t directed) {
+static igraph_error_t igraph_i_tree_game_prufer(igraph_t *graph, igraph_int_t n, igraph_bool_t directed) {
     igraph_vector_int_t prufer;
 
     if (directed) {
@@ -45,11 +43,9 @@ static igraph_error_t igraph_i_tree_game_prufer(igraph_t *graph, igraph_integer_
 
     IGRAPH_VECTOR_INT_INIT_FINALLY(&prufer, n - 2);
 
-    RNG_BEGIN();
-    for (igraph_integer_t i = 0; i < n - 2; ++i) {
+    for (igraph_int_t i = 0; i < n - 2; ++i) {
         VECTOR(prufer)[i] = RNG_INTEGER(0, n - 1);
     }
-    RNG_END();
 
     IGRAPH_CHECK(igraph_from_prufer(graph, &prufer));
 
@@ -67,18 +63,18 @@ static igraph_error_t igraph_i_tree_game_prufer(igraph_t *graph, igraph_integer_
 /* swap two elements of a vector_int */
 #define SWAP_INT_ELEM(vec, i, j) \
     { \
-        igraph_integer_t temp; \
+        igraph_int_t temp; \
         temp = VECTOR(vec)[i]; \
         VECTOR(vec)[i] = VECTOR(vec)[j]; \
         VECTOR(vec)[j] = temp; \
     }
 
-static igraph_error_t igraph_i_tree_game_loop_erased_random_walk(igraph_t *graph, igraph_integer_t n, igraph_bool_t directed) {
+static igraph_error_t igraph_i_tree_game_loop_erased_random_walk(igraph_t *graph, igraph_int_t n, igraph_bool_t directed) {
     igraph_vector_int_t edges;
     igraph_vector_int_t vertices;
     igraph_bitset_t visited;
-    igraph_integer_t i, j;
-    igraph_integer_t no_edges;
+    igraph_int_t i, j;
+    igraph_int_t no_edges;
 
     IGRAPH_SAFE_MULT(n - 1, 2, &no_edges);
 
@@ -90,8 +86,6 @@ static igraph_error_t igraph_i_tree_game_loop_erased_random_walk(igraph_t *graph
     /* The vertices vector contains visited vertices between 0..k-1, unvisited ones between k..n-1. */
     IGRAPH_CHECK(igraph_vector_int_init_range(&vertices, 0, n));
     IGRAPH_FINALLY(igraph_vector_int_destroy, &vertices);
-
-    RNG_BEGIN();
 
     /* A simple implementation could be as below. This is for illustration only.
      * The actually implemented algorithm avoids unnecessary walking on the already visited
@@ -121,7 +115,7 @@ static igraph_error_t igraph_i_tree_game_loop_erased_random_walk(igraph_t *graph
     IGRAPH_BIT_SET(visited, i);
     SWAP_INT_ELEM(vertices, 0, i);
 
-    for (igraph_integer_t k = 1; k < n; ++k) {
+    for (igraph_int_t k = 1; k < n; ++k) {
         j = RNG_INTEGER(0, n - 1);
         if (IGRAPH_BIT_TEST(visited, VECTOR(vertices)[j])) {
             i = VECTOR(vertices)[j];
@@ -133,8 +127,6 @@ static igraph_error_t igraph_i_tree_game_loop_erased_random_walk(igraph_t *graph
         i = VECTOR(vertices)[k];
         VECTOR(edges)[2 * k - 1] = i;
     }
-
-    RNG_END();
 
     IGRAPH_CHECK(igraph_create(graph, &edges, n, directed));
 
@@ -181,7 +173,7 @@ static igraph_error_t igraph_i_tree_game_loop_erased_random_walk(igraph_t *graph
  *
  */
 
-igraph_error_t igraph_tree_game(igraph_t *graph, igraph_integer_t n, igraph_bool_t directed, igraph_random_tree_t method) {
+igraph_error_t igraph_tree_game(igraph_t *graph, igraph_int_t n, igraph_bool_t directed, igraph_random_tree_t method) {
     if (n < 2) {
         IGRAPH_CHECK(igraph_empty(graph, n, directed));
         return IGRAPH_SUCCESS;

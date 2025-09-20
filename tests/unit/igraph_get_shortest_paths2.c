@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard st, Cambridge MA, 02139 USA
 
@@ -26,16 +25,16 @@
 #include "test_utilities.h"
 
 int main(void) {
-    const igraph_integer_t edges[] = { 0, 1, 0, 2, 1, 6, 2, 6, 1, 3, 1, 4, 1, 5,
+    igraph_t g;
+    const igraph_int_t edges[] = { 0, 1, 0, 2, 1, 6, 2, 6, 1, 3, 1, 4, 1, 5,
                                     3, 2, 4, 2, 5, 2
                                   };
-    igraph_t g;
-    igraph_vector_int_t edgev;
+    const igraph_vector_int_t edgev = igraph_vector_int_view(edges, sizeof(edges) / sizeof(edges[0]));
     igraph_vector_int_list_t resvertices, resedges;
     igraph_vector_int_t parents, inbound_edges;
-    igraph_integer_t vcount, i;
+    igraph_int_t vcount, i;
 
-    igraph_vector_int_view(&edgev, edges, sizeof(edges) / sizeof(edges[0]));
+
     vcount = igraph_vector_int_max(&edgev) + 1;
     igraph_create(&g, &edgev, vcount, IGRAPH_DIRECTED);
 
@@ -44,7 +43,7 @@ int main(void) {
     igraph_vector_int_init(&parents, 0);
     igraph_vector_int_init(&inbound_edges, 0);
 
-    igraph_get_shortest_paths(&g, &resvertices, &resedges, /*from=*/ 0,
+    igraph_get_shortest_paths(&g, NULL, &resvertices, &resedges, /*from=*/ 0,
                               /*to=*/ igraph_vss_all(), /*mode=*/ IGRAPH_OUT,
                               &parents, &inbound_edges);
 

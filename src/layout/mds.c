@@ -1,7 +1,5 @@
-/* -*- mode: C -*-  */
-/* vim:set ts=4 sw=4 sts=4 et: */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2003-2020  The igraph development team
 
    This program is free software; you can redistribute it and/or modify
@@ -28,7 +26,6 @@
 #include "igraph_components.h"
 #include "igraph_eigen.h"
 #include "igraph_interface.h"
-#include "igraph_memory.h"
 #include "igraph_operators.h"
 #include "igraph_paths.h"
 #include "igraph_random.h"
@@ -40,7 +37,7 @@ static igraph_error_t igraph_i_layout_mds_step(igraph_real_t *to, const igraph_r
                                     int n, void *extra);
 
 static igraph_error_t igraph_i_layout_mds_single(const igraph_t* graph, igraph_matrix_t *res,
-                                      igraph_matrix_t *dist, igraph_integer_t dim);
+                                      igraph_matrix_t *dist, igraph_int_t dim);
 
 static igraph_error_t igraph_i_layout_mds_step(igraph_real_t *to, const igraph_real_t *from,
                                     int n, void *extra) {
@@ -53,14 +50,14 @@ static igraph_error_t igraph_i_layout_mds_step(igraph_real_t *to, const igraph_r
 /* MDS layout for a connected graph, with no error checking on the
  * input parameters. The distance matrix will be modified in-place. */
 igraph_error_t igraph_i_layout_mds_single(const igraph_t* graph, igraph_matrix_t *res,
-                               igraph_matrix_t *dist, igraph_integer_t dim) {
+                               igraph_matrix_t *dist, igraph_int_t dim) {
 
-    igraph_integer_t no_of_nodes = igraph_vcount(graph);
-    igraph_integer_t nev = dim;
+    igraph_int_t no_of_nodes = igraph_vcount(graph);
+    igraph_int_t nev = dim;
     igraph_matrix_t vectors;
     igraph_vector_t values, row_means;
     igraph_real_t grand_mean;
-    igraph_integer_t i, j, k;
+    igraph_int_t i, j, k;
     igraph_eigen_which_t which;
 
     if (no_of_nodes > INT_MAX) {
@@ -189,13 +186,11 @@ igraph_error_t igraph_i_layout_mds_single(const igraph_t* graph, igraph_matrix_t
  */
 
 igraph_error_t igraph_layout_mds(const igraph_t *graph, igraph_matrix_t *res,
-                      const igraph_matrix_t *dist, igraph_integer_t dim) {
+                      const igraph_matrix_t *dist, igraph_int_t dim) {
 
-    const igraph_integer_t no_of_nodes = igraph_vcount(graph);
+    const igraph_int_t no_of_nodes = igraph_vcount(graph);
     igraph_matrix_t m;
     igraph_bool_t conn;
-
-    RNG_BEGIN();
 
     /* Check the distance matrix */
     if (dist && (igraph_matrix_nrow(dist) != no_of_nodes ||
@@ -215,12 +210,12 @@ igraph_error_t igraph_layout_mds(const igraph_t *graph, igraph_matrix_t *res,
     /* Copy or obtain the distance matrix */
     if (dist == 0) {
         IGRAPH_MATRIX_INIT_FINALLY(&m, no_of_nodes, no_of_nodes);
-        IGRAPH_CHECK(igraph_distances(graph, &m, igraph_vss_all(), igraph_vss_all(), IGRAPH_ALL));
+        IGRAPH_CHECK(igraph_distances(graph, NULL, &m, igraph_vss_all(), igraph_vss_all(), IGRAPH_ALL));
     } else {
         IGRAPH_CHECK(igraph_matrix_init_copy(&m, dist));
         IGRAPH_FINALLY(igraph_matrix_destroy, &m);
         /* Make sure that the diagonal contains zeroes only */
-        for (igraph_integer_t i = 0; i < no_of_nodes; i++) {
+        for (igraph_int_t i = 0; i < no_of_nodes; i++) {
             MATRIX(m, i, i) = 0.0;
         }
     }
@@ -239,7 +234,7 @@ igraph_error_t igraph_layout_mds(const igraph_t *graph, igraph_matrix_t *res,
         igraph_matrix_t layout;
         igraph_matrix_t dist_submatrix;
         igraph_bitset_t seen_vertices;
-        igraph_integer_t n, processed_vertex_count = 0;
+        igraph_int_t n, processed_vertex_count = 0;
 
         IGRAPH_VECTOR_INT_INIT_FINALLY(&comp, 0);
         IGRAPH_VECTOR_INT_INIT_FINALLY(&vertex_order, no_of_nodes);
@@ -252,7 +247,7 @@ igraph_error_t igraph_layout_mds(const igraph_t *graph, igraph_matrix_t *res,
 
         IGRAPH_BITSET_INIT_FINALLY(&seen_vertices, no_of_nodes);
 
-        for (igraph_integer_t i = 0; i < no_of_nodes; i++) {
+        for (igraph_int_t i = 0; i < no_of_nodes; i++) {
             if (IGRAPH_BIT_TEST(seen_vertices, i)) {
                 continue;
             }
@@ -274,7 +269,7 @@ igraph_error_t igraph_layout_mds(const igraph_t *graph, igraph_matrix_t *res,
             IGRAPH_FINALLY_CLEAN(1);
             /* Mark all the vertices in the component as visited */
             n = igraph_vector_int_size(&comp);
-            for (igraph_integer_t j = 0; j < n; j++) {
+            for (igraph_int_t j = 0; j < n; j++) {
                 IGRAPH_BIT_SET(seen_vertices, VECTOR(comp)[j]);
                 VECTOR(vertex_order)[VECTOR(comp)[j]] = processed_vertex_count++;
             }
@@ -292,8 +287,6 @@ igraph_error_t igraph_layout_mds(const igraph_t *graph, igraph_matrix_t *res,
         igraph_vector_int_destroy(&comp);
         IGRAPH_FINALLY_CLEAN(6);
     }
-
-    RNG_END();
 
     igraph_matrix_destroy(&m);
     IGRAPH_FINALLY_CLEAN(1);

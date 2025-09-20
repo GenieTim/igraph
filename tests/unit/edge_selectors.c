@@ -1,5 +1,5 @@
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2021  The igraph development team <igraph@igraph.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 
 void check(igraph_t *graph, igraph_es_t *es) {
     igraph_eit_t eit;
-    igraph_integer_t edge;
+    igraph_int_t edge;
     IGRAPH_ASSERT(igraph_eit_create(graph, *es, &eit) == IGRAPH_SUCCESS);
     for (; !IGRAPH_EIT_END(eit); IGRAPH_EIT_NEXT(eit)) {
         edge = IGRAPH_EIT_GET(eit);
@@ -44,8 +44,8 @@ int main(void) {
     igraph_vector_int_init_int(&v, 3, 2, 3, 4);
     igraph_es_vector(&es, &v);
     check(&g, &es);
-    CHECK_ERROR(igraph_eit_create(&g_no_edges, es, &eit), IGRAPH_EINVAL);
-    CHECK_ERROR(igraph_eit_create(&g_no_vertices, es, &eit), IGRAPH_EINVAL);
+    CHECK_ERROR(igraph_eit_create(&g_no_edges, es, &eit), IGRAPH_EINVEID);
+    CHECK_ERROR(igraph_eit_create(&g_no_vertices, es, &eit), IGRAPH_EINVEID);
 
     printf("es_vector_copy\n");
     igraph_es_vector_copy(&es, &v);
@@ -66,14 +66,14 @@ int main(void) {
     printf("es_vector with negative entry should fail.\n");
     igraph_vector_int_init_int(&v, 3, -2, 3, 4);
     igraph_es_vector(&es, &v);
-    CHECK_ERROR(igraph_eit_create(&g, es, &eit), IGRAPH_EINVAL);
+    CHECK_ERROR(igraph_eit_create(&g, es, &eit), IGRAPH_EINVEID);
     igraph_vector_int_destroy(&v);
 
     printf("Checking es_range:\n");
     igraph_es_range(&es, 2, 5);
     check(&g, &es);
-    CHECK_ERROR(igraph_eit_create(&g_no_edges, es, &eit), IGRAPH_EINVAL);
-    CHECK_ERROR(igraph_eit_create(&g_no_vertices, es, &eit), IGRAPH_EINVAL);
+    CHECK_ERROR(igraph_eit_create(&g_no_edges, es, &eit), IGRAPH_EINVEID);
+    CHECK_ERROR(igraph_eit_create(&g_no_vertices, es, &eit), IGRAPH_EINVEID);
 
     printf("Checking eit_as_vector using seq:\n");
     igraph_eit_create(&g, es, &eit);
@@ -85,14 +85,14 @@ int main(void) {
     printf("Checking ess_range using es_range parameters:\n");
     es = igraph_ess_range(2, 5);
     check(&g, &es);
-    CHECK_ERROR(igraph_eit_create(&g_no_edges, es, &eit), IGRAPH_EINVAL);
-    CHECK_ERROR(igraph_eit_create(&g_no_vertices, es, &eit), IGRAPH_EINVAL);
+    CHECK_ERROR(igraph_eit_create(&g_no_edges, es, &eit), IGRAPH_EINVEID);
+    CHECK_ERROR(igraph_eit_create(&g_no_vertices, es, &eit), IGRAPH_EINVEID);
 
     printf("Checking whether ess_range accepts an empty range.\n");
     es = igraph_ess_range(2, 2);
     check(&g, &es);
-    CHECK_ERROR(igraph_eit_create(&g_no_edges, es, &eit), IGRAPH_EINVAL);
-    CHECK_ERROR(igraph_eit_create(&g_no_vertices, es, &eit), IGRAPH_EINVAL);
+    CHECK_ERROR(igraph_eit_create(&g_no_edges, es, &eit), IGRAPH_EINVEID);
+    CHECK_ERROR(igraph_eit_create(&g_no_vertices, es, &eit), IGRAPH_EINVEID);
 
     printf("Checking es_path:\n");
     igraph_vector_int_init_int(&v, 3, 4, 3, 2);

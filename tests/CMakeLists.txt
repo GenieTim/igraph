@@ -79,7 +79,6 @@ add_legacy_tests(
   igraph_sparsemat_minmax
   igraph_sparsemat_nonzero_storage
   igraph_sparsemat_normalize
-  igraph_sparsemat_view
   igraph_sparsemat_which_minmax
   igraph_strvector
   igraph_vector_floor
@@ -144,8 +143,7 @@ add_legacy_tests(
   igraph_empty
   igraph_get_eid
   igraph_is_same_graph
-  igraph_i_incident
-  igraph_i_neighbors
+  igraph_incident
   igraph_neighbors
 )
 
@@ -169,7 +167,6 @@ add_legacy_tests(
 # structure_generators.at
 add_examples(
   FOLDER examples/simple NAMES
-  igraph_adjacency
   igraph_atlas
   igraph_barabasi_game
   igraph_barabasi_game2
@@ -226,6 +223,7 @@ add_legacy_tests(
   igraph_k_regular_game
   igraph_lastcit_game
   igraph_linegraph
+  igraph_lcf
   igraph_kautz
   igraph_preference_game
   igraph_perfect
@@ -288,11 +286,15 @@ add_legacy_tests(
   components
   coreness
   efficiency
+# The eigen_stress test is disabled by default. The chance of failure on at
+# least some platforms, or with some BLAS/LAPACK/ARPACK versions is high
+# due to ARPACK's fickleness. The test is still useful for local testing.
+  # eigen_stress
   global_transitivity
   harmonic_centrality
   hub_and_authority
   igraph_count_adjacent_triangles
-  igraph_are_connected
+  igraph_are_adjacent
   igraph_average_path_length
   igraph_average_path_length_dijkstra
   igraph_betweenness
@@ -364,6 +366,7 @@ add_legacy_tests(
   igraph_spanner
   jdm
   knn
+  minimum_spanning_tree
   mycielskian
   paths
   random_spanning_tree
@@ -684,6 +687,7 @@ add_legacy_tests(
   igraph_community_fluid_communities
   igraph_community_infomap
   igraph_community_leading_eigenvector2
+  igraph_community_optimal_modularity
   igraph_community_voronoi
   igraph_compare_communities
   igraph_le_community_to_membership
@@ -722,6 +726,7 @@ add_legacy_tests(
   igraph_weighted_cliques
   maximal_cliques_callback
   maximal_cliques_hist
+  max_results
 )
 
 # eigen.at
@@ -797,6 +802,7 @@ add_legacy_tests(
   igraph_bipartite_projection
   igraph_biadjacency
   igraph_get_biadjacency
+  igraph_weighted_biadjacency
 )
 
 # centralization.at
@@ -921,6 +927,16 @@ add_legacy_tests(
   igraph_realize_bipartite_degree_sequence
 )
 
+# spatial
+add_legacy_tests(
+  FOLDER tests/unit NAMES
+  beta_skeletons
+  igraph_delaunay_graph
+  igraph_nearest_neighbor_graph
+  igraph_spatial_edge_lengths
+)
+
+
 # cycle bases
 add_legacy_tests(
   FOLDER tests/unit NAMES
@@ -990,7 +1006,9 @@ add_benchmarks(
   connectivity
   erdos_renyi
   graphicality
+  igraph_adjacency
   igraph_average_path_length_unweighted
+  beta_skeletons
   igraph_betweenness
   igraph_betweenness_weighted
   igraph_cliques
@@ -999,6 +1017,7 @@ add_benchmarks(
   igraph_decompose
   igraph_degree
   igraph_degree_sequence_game
+  igraph_delaunay_graph
   igraph_distances
   igraph_ecc
   igraph_induced_subgraph
@@ -1006,6 +1025,7 @@ add_benchmarks(
   igraph_layout_umap
   igraph_matrix_transpose
   igraph_maximal_cliques
+  igraph_nearest_neighbor_graph
   igraph_neighborhood
   igraph_pagerank
   igraph_pagerank_weighted
@@ -1013,6 +1033,7 @@ add_benchmarks(
   igraph_qsort
   igraph_random_walk
   igraph_realize_degree_sequence
+  igraph_rewire
   igraph_strength
   igraph_transitivity
   igraph_tree_game
@@ -1022,13 +1043,14 @@ add_benchmarks(
   intersection
   lad
   modularity
+  spanning_tree
 )
 
-# dot product
+# sampling
 add_legacy_tests(
   FOLDER tests/unit NAMES
-  igraph_sample_dirichlet
-  igraph_sample_sphere
+  igraph_rng_sample_dirichlet
+  igraph_rng_sample_sphere
 )
 
 # lattices

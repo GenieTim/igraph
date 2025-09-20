@@ -1,7 +1,5 @@
-/* -*- mode: C -*-  */
-/* vim:set ts=4 sw=4 sts=4 et: */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2007-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -30,7 +28,7 @@ int main(void) {
     igraph_t g;
     igraph_vector_int_t membership, initial;
     igraph_vector_bool_t fixed;
-    igraph_integer_t i;
+    igraph_int_t i;
 
     /* label propagation is a stochastic method */
     igraph_rng_seed(igraph_rng_default(), 765);
@@ -49,7 +47,7 @@ int main(void) {
 
     igraph_vector_int_init(&membership, 0);
 
-    igraph_community_label_propagation(&g, &membership, IGRAPH_OUT, 0, &initial, &fixed);
+    igraph_community_label_propagation(&g, &membership, IGRAPH_OUT, NULL, &initial, &fixed, IGRAPH_LPA_DOMINANCE);
 
     for (i = 0; i < igraph_vcount(&g); i++) {
         /* Check that the "fixed" vector has not been changed */

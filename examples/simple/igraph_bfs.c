@@ -1,6 +1,5 @@
-/* -*- mode: C -*-  */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2009-2021  The igraph development team
 
    This program is free software; you can redistribute it and/or modify
@@ -26,6 +25,9 @@ int main(void) {
 
     igraph_t graph, ring;
     igraph_vector_int_t order, rank, father, pred, succ, dist;
+
+    /* Initialize the library. */
+    igraph_setup();
 
     /* Create a disjoint union of two rings */
     igraph_ring(&ring, 10, /*directed=*/ 0, /*mutual=*/ 0, /*circular=*/ 1);

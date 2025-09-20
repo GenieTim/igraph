@@ -1,7 +1,5 @@
-/* -*- mode: C -*-  */
-/* vim:set ts=4 sw=4 sts=4 et: */
 /*
-   IGraph library.
+   igraph library.
    Copyright (C) 2005-2012  Gabor Csardi <csardi.gabor@gmail.com>
    334 Harvard street, Cambridge, MA 02139 USA
 
@@ -37,6 +35,11 @@
  * \param graph The input graph.
  * \param res Pointer to a boolean constant, the result
  *     is stored here.
+ * \param directed Whether to consider the directions of edges. \c IGRAPH_UNDIRECTED
+ *     means that edge directions will be ignored and a directed graph with at
+ *     least one mutual edge pair will be considered non-simple. \c IGRAPH_DIRECTED
+ *     means that edge directions will be considered. Ignored for
+ *     undirected graphs.
  * \return Error code.
  *
  * \sa \ref igraph_is_loop() and \ref igraph_is_multiple() to
@@ -46,9 +49,9 @@
  *
  * Time complexity: O(|V|+|E|).
  */
-igraph_error_t igraph_is_simple(const igraph_t *graph, igraph_bool_t *res) {
-    igraph_integer_t vc = igraph_vcount(graph);
-    igraph_integer_t ec = igraph_ecount(graph);
+igraph_error_t igraph_is_simple(const igraph_t *graph, igraph_bool_t *res, igraph_bool_t directed) {
+    igraph_int_t vc = igraph_vcount(graph);
+    igraph_int_t ec = igraph_ecount(graph);
 
     /* Is it already known whether the graph has loops or multi-edges? */
     igraph_bool_t known_loop, known_multi;
@@ -56,12 +59,15 @@ igraph_error_t igraph_is_simple(const igraph_t *graph, igraph_bool_t *res) {
     /* If it is known, does the graph have them? */
     igraph_bool_t has_loop, has_multi;
 
+    /* Will we need to check mutual edges explicitly? */
+    igraph_bool_t need_to_check_mutual = directed == IGRAPH_UNDIRECTED && igraph_is_directed(graph);
+
     known_loop  = igraph_i_property_cache_has(graph, IGRAPH_PROP_HAS_LOOP);
     if (known_loop) {
         has_loop = igraph_i_property_cache_get_bool(graph, IGRAPH_PROP_HAS_LOOP);
         if (has_loop) {
             *res = false;
-            return IGRAPH_SUCCESS;
+            goto early_exit;
         }
     }
 
@@ -70,15 +76,13 @@ igraph_error_t igraph_is_simple(const igraph_t *graph, igraph_bool_t *res) {
         has_multi = igraph_i_property_cache_get_bool(graph, IGRAPH_PROP_HAS_MULTI);
         if (has_multi) {
             *res = false;
-            return IGRAPH_SUCCESS;
+            goto early_exit;
         }
     }
 
-    if (known_loop && known_multi) {
-        if (!has_loop && !has_multi) {
-            *res = true;
-            return IGRAPH_SUCCESS;
-        }
+    if (known_loop && known_multi && !has_loop && !has_multi) {
+        *res = true;
+        goto early_exit;
     }
 
     /* Up to now, these variables were used to store the cache status.
@@ -94,10 +98,12 @@ igraph_error_t igraph_is_simple(const igraph_t *graph, igraph_bool_t *res) {
     } else {
         igraph_vector_int_t neis;
         IGRAPH_VECTOR_INT_INIT_FINALLY(&neis, 0);
-        for (igraph_integer_t i = 0; i < vc; i++) {
-            IGRAPH_CHECK(igraph_neighbors(graph, &neis, i, IGRAPH_OUT));
-            const igraph_integer_t n = igraph_vector_int_size(&neis);
-            for (igraph_integer_t j = 0; j < n; j++) {
+        for (igraph_int_t i = 0; i < vc; i++) {
+            IGRAPH_CHECK(igraph_neighbors(
+                graph, &neis, i, IGRAPH_OUT, IGRAPH_LOOPS, IGRAPH_MULTIPLE
+            ));
+            const igraph_int_t n = igraph_vector_int_size(&neis);
+            for (igraph_int_t j = 0; j < n; j++) {
                 if (VECTOR(neis)[j] == i) {
                     known_loop = true; has_loop = true; break;
                 }
@@ -124,6 +130,19 @@ igraph_error_t igraph_is_simple(const igraph_t *graph, igraph_bool_t *res) {
 
     if (known_multi) {
         igraph_i_property_cache_set_bool_checked(graph, IGRAPH_PROP_HAS_MULTI, has_multi);
+    }
+
+early_exit:
+    /* If at this point we have concluded that the graph is simple, _but_ the user
+     * asked us to ignore edge directions, we need to look for mutual edge pairs
+     * and return false if we find one. */
+    if (*res && need_to_check_mutual) {
+        /* If the graph is undirected, we also check for mutual edges. */
+        igraph_bool_t has_mutual;
+        IGRAPH_CHECK(igraph_has_mutual(graph, &has_mutual, false));
+        if (has_mutual) {
+            *res = false;
+        }
     }
 
     return IGRAPH_SUCCESS;
@@ -155,8 +174,8 @@ igraph_error_t igraph_is_simple(const igraph_t *graph, igraph_bool_t *res) {
  * \example examples/simple/igraph_has_multiple.c
  */
 igraph_error_t igraph_has_multiple(const igraph_t *graph, igraph_bool_t *res) {
-    igraph_integer_t vc = igraph_vcount(graph);
-    igraph_integer_t ec = igraph_ecount(graph);
+    igraph_int_t vc = igraph_vcount(graph);
+    igraph_int_t ec = igraph_ecount(graph);
     igraph_bool_t directed = igraph_is_directed(graph);
 
     IGRAPH_RETURN_IF_CACHED_BOOL(graph, IGRAPH_PROP_HAS_MULTI, res);
@@ -165,12 +184,13 @@ igraph_error_t igraph_has_multiple(const igraph_t *graph, igraph_bool_t *res) {
         *res = false;
     } else {
         igraph_vector_int_t neis;
-        igraph_integer_t i, j, n;
+        igraph_int_t i, j, n;
         igraph_bool_t found = false;
         IGRAPH_VECTOR_INT_INIT_FINALLY(&neis, 0);
         for (i = 0; i < vc && !found; i++) {
-            IGRAPH_CHECK(igraph_neighbors(graph, &neis, i,
-                                          IGRAPH_OUT));
+            IGRAPH_CHECK(igraph_neighbors(
+                graph, &neis, i, IGRAPH_OUT, IGRAPH_LOOPS, IGRAPH_MULTIPLE
+            ));
             n = igraph_vector_int_size(&neis);
             for (j = 1; j < n; j++) {
                 if (VECTOR(neis)[j - 1] == VECTOR(neis)[j]) {
@@ -229,7 +249,7 @@ igraph_error_t igraph_has_multiple(const igraph_t *graph, igraph_bool_t *res) {
 igraph_error_t igraph_is_multiple(const igraph_t *graph, igraph_vector_bool_t *res,
                                   igraph_es_t es) {
     igraph_eit_t eit;
-    igraph_integer_t i, j, n;
+    igraph_int_t i, j, n;
     igraph_lazy_inclist_t inclist;
 
     IGRAPH_CHECK(igraph_eit_create(graph, es, &eit));
@@ -241,9 +261,9 @@ igraph_error_t igraph_is_multiple(const igraph_t *graph, igraph_vector_bool_t *r
     IGRAPH_CHECK(igraph_vector_bool_resize(res, IGRAPH_EIT_SIZE(eit)));
 
     for (i = 0; !IGRAPH_EIT_END(eit); i++, IGRAPH_EIT_NEXT(eit)) {
-        igraph_integer_t e = IGRAPH_EIT_GET(eit);
-        igraph_integer_t from = IGRAPH_FROM(graph, e);
-        igraph_integer_t to = IGRAPH_TO(graph, e);
+        igraph_int_t e = IGRAPH_EIT_GET(eit);
+        igraph_int_t from = IGRAPH_FROM(graph, e);
+        igraph_int_t to = IGRAPH_TO(graph, e);
         igraph_vector_int_t *neis = igraph_lazy_inclist_get(&inclist, from);
 
         IGRAPH_CHECK_OOM(neis, "Failed to query incident edges.");
@@ -252,8 +272,8 @@ igraph_error_t igraph_is_multiple(const igraph_t *graph, igraph_vector_bool_t *r
 
         n = igraph_vector_int_size(neis);
         for (j = 0; j < n; j++) {
-            igraph_integer_t e2 = VECTOR(*neis)[j];
-            igraph_integer_t to2 = IGRAPH_OTHER(graph, e2, from);
+            igraph_int_t e2 = VECTOR(*neis)[j];
+            igraph_int_t to2 = IGRAPH_OTHER(graph, e2, from);
             if (to2 == to && e2 < e) {
                 VECTOR(*res)[i] = true;
             }
@@ -293,7 +313,7 @@ igraph_error_t igraph_is_multiple(const igraph_t *graph, igraph_vector_bool_t *r
 igraph_error_t igraph_count_multiple(const igraph_t *graph, igraph_vector_int_t *res,
                                      igraph_es_t es) {
     igraph_eit_t eit;
-    igraph_integer_t i, j, n;
+    igraph_int_t i, j, n;
     igraph_lazy_adjlist_t adjlist;
 
     IGRAPH_CHECK(igraph_eit_create(graph, es, &eit));
@@ -304,9 +324,9 @@ igraph_error_t igraph_count_multiple(const igraph_t *graph, igraph_vector_int_t 
     IGRAPH_CHECK(igraph_vector_int_resize(res, IGRAPH_EIT_SIZE(eit)));
 
     for (i = 0; !IGRAPH_EIT_END(eit); i++, IGRAPH_EIT_NEXT(eit)) {
-        igraph_integer_t e = IGRAPH_EIT_GET(eit);
-        igraph_integer_t from = IGRAPH_FROM(graph, e);
-        igraph_integer_t to = IGRAPH_TO(graph, e);
+        igraph_int_t e = IGRAPH_EIT_GET(eit);
+        igraph_int_t from = IGRAPH_FROM(graph, e);
+        igraph_int_t to = IGRAPH_TO(graph, e);
         igraph_vector_int_t *neis = igraph_lazy_adjlist_get(&adjlist, from);
 
         IGRAPH_CHECK_OOM(neis, "Failed to query adjacent vertices.");
@@ -344,16 +364,18 @@ igraph_error_t igraph_count_multiple(const igraph_t *graph, igraph_vector_int_t 
  *
  * Time complexity: O(d), where d is the out-degree of the tail of the edge.
  */
-igraph_error_t igraph_count_multiple_1(const igraph_t *graph, igraph_integer_t *res,
-                                       igraph_integer_t eid)
+igraph_error_t igraph_count_multiple_1(const igraph_t *graph, igraph_int_t *res,
+                                       igraph_int_t eid)
 {
-    igraph_integer_t i, n, count;
-    igraph_integer_t from = IGRAPH_FROM(graph, eid);
-    igraph_integer_t to = IGRAPH_TO(graph, eid);
+    igraph_int_t i, n, count;
+    igraph_int_t from = IGRAPH_FROM(graph, eid);
+    igraph_int_t to = IGRAPH_TO(graph, eid);
     igraph_vector_int_t vids;
 
     IGRAPH_VECTOR_INT_INIT_FINALLY(&vids, 0);
-    IGRAPH_CHECK(igraph_neighbors(graph, &vids, from, IGRAPH_OUT));
+    IGRAPH_CHECK(igraph_neighbors(
+        graph, &vids, from, IGRAPH_OUT, IGRAPH_LOOPS, IGRAPH_MULTIPLE
+    ));
 
     count = 0;
     n = igraph_vector_int_size(&vids);
@@ -406,7 +428,7 @@ igraph_error_t igraph_is_mutual(const igraph_t *graph, igraph_vector_bool_t *res
 
     igraph_eit_t eit;
     igraph_lazy_adjlist_t adjlist;
-    igraph_integer_t i;
+    igraph_int_t i;
 
     /* How many edges do we have? */
     IGRAPH_CHECK(igraph_eit_create(graph, es, &eit));
@@ -426,9 +448,9 @@ igraph_error_t igraph_is_mutual(const igraph_t *graph, igraph_vector_bool_t *res
     IGRAPH_FINALLY(igraph_lazy_adjlist_destroy, &adjlist);
 
     for (i = 0; ! IGRAPH_EIT_END(eit); i++, IGRAPH_EIT_NEXT(eit)) {
-        igraph_integer_t edge = IGRAPH_EIT_GET(eit);
-        igraph_integer_t from = IGRAPH_FROM(graph, edge);
-        igraph_integer_t to = IGRAPH_TO(graph, edge);
+        igraph_int_t edge = IGRAPH_EIT_GET(eit);
+        igraph_int_t from = IGRAPH_FROM(graph, edge);
+        igraph_int_t to = IGRAPH_TO(graph, edge);
 
         if (from == to) {
             VECTOR(*res)[i] = loops;
@@ -477,7 +499,7 @@ igraph_error_t igraph_is_mutual(const igraph_t *graph, igraph_vector_bool_t *res
  */
 igraph_error_t igraph_has_mutual(const igraph_t *graph, igraph_bool_t *res,
                                  igraph_bool_t loops) {
-    igraph_integer_t no_of_edges = igraph_ecount(graph);
+    igraph_int_t no_of_edges = igraph_ecount(graph);
     igraph_lazy_adjlist_t adjlist;
 
     if (! igraph_is_directed(graph)) {
@@ -507,9 +529,9 @@ igraph_error_t igraph_has_mutual(const igraph_t *graph, igraph_bool_t *res,
     IGRAPH_FINALLY(igraph_lazy_adjlist_destroy, &adjlist);
 
     *res = false; /* assume no mutual edges */
-    for (igraph_integer_t edge=0; edge < no_of_edges; edge++) {
-        igraph_integer_t from = IGRAPH_FROM(graph, edge);
-        igraph_integer_t to = IGRAPH_TO(graph, edge);
+    for (igraph_int_t edge=0; edge < no_of_edges; edge++) {
+        igraph_int_t from = IGRAPH_FROM(graph, edge);
+        igraph_int_t to = IGRAPH_TO(graph, edge);
 
         if (from == to) {
             if (loops) {
