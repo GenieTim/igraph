@@ -457,7 +457,7 @@ static igraph_error_t igraph_i_graphml_parser_state_finish_parsing(struct igraph
             IGRAPH_CHECK(igraph_attribute_record_list_push_back_new(&eattr, &idrec));
             IGRAPH_CHECK(igraph_attribute_record_set_name(idrec, idstr));
             IGRAPH_CHECK(igraph_attribute_record_set_type(idrec, IGRAPH_ATTRIBUTE_STRING));
-            IGRAPH_CHECK(igraph_strvector_update(idrec->value.as_strvector, igraph_i_trie_borrow_keys(&state->node_trie)));
+            IGRAPH_CHECK(igraph_strvector_update(idrec->value.as_strvector, &state->edgeids));
             IGRAPH_CHECK(igraph_attribute_record_resize(idrec, igraph_vector_int_size(&state->edgelist) / 2));
         } else {
             IGRAPH_WARNING("Could not add edge ids, there is already an 'id' edge attribute.");
@@ -1698,10 +1698,10 @@ igraph_error_t igraph_write_graph_graphml(const igraph_t *graph, FILE *outstream
     IGRAPH_VECTOR_INT_INIT_FINALLY(&gtypes, 0);
     IGRAPH_VECTOR_INT_INIT_FINALLY(&vtypes, 0);
     IGRAPH_VECTOR_INT_INIT_FINALLY(&etypes, 0);
-    igraph_i_attribute_get_info(graph,
+    IGRAPH_CHECK(igraph_i_attribute_get_info(graph,
                                 &gnames, &gtypes,
                                 &vnames, &vtypes,
-                                &enames, &etypes);
+                                &enames, &etypes));
 
     /* graph attributes */
     for (i = 0; i < igraph_vector_int_size(&gtypes); i++) {
@@ -1929,7 +1929,8 @@ igraph_error_t igraph_write_graph_graphml(const igraph_t *graph, FILE *outstream
         igraph_int_t from, to;
         const char *name; char *name_escaped;
         igraph_int_t edge = IGRAPH_EIT_GET(it);
-        igraph_edge(graph, edge, &from, &to);
+
+        IGRAPH_CHECK(igraph_edge(graph, edge, &from, &to));
         ret = fprintf(outstream, "    <edge source=\"n%" IGRAPH_PRId "\" target=\"n%" IGRAPH_PRId "\">\n",
                       from, to);
         if (ret < 0) {

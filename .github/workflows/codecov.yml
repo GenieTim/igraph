@@ -15,7 +15,7 @@ jobs:
       run: sudo apt-get install lcov libglpk-dev libarpack2-dev
 
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -40,6 +40,6 @@ jobs:
       run: cmake --build . --target coverage --parallel
 
     - name: Codecov.io
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v6
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

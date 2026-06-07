@@ -232,6 +232,7 @@ add_legacy_tests(
   igraph_recent_degree_game
   igraph_sbm_game
   igraph_simple_interconnected_islands_game
+  igraph_hamming
   igraph_square_lattice
   igraph_static_power_law_game
   igraph_tree_from_parent_vector
@@ -266,6 +267,7 @@ add_examples(
   igraph_has_multiple
   igraph_is_loop
   igraph_is_multiple
+  igraph_is_triangle_free
   igraph_list_triangles
   igraph_avg_nearest_neighbor_degree
   igraph_minimum_spanning_tree
@@ -327,6 +329,7 @@ add_legacy_tests(
   igraph_get_shortest_paths_dijkstra
   igraph_graph_center
   igraph_has_mutual
+  igraph_is_acyclic
   igraph_is_bipartite
   igraph_is_connected
   igraph_is_chordal
@@ -337,9 +340,10 @@ add_legacy_tests(
   igraph_is_tree
   igraph_is_forest
   igraph_is_forest2
+  igraph_is_simple
+  igraph_is_triangle_free
   igraph_joint_degree_distribution
   igraph_joint_type_distribution
-  igraph_is_acyclic
   igraph_list_triangles
   igraph_local_scan_k_ecount
   igraph_local_scan_k_ecount_them
@@ -564,6 +568,7 @@ add_legacy_tests(
   igraph_power_law_fit
   overflow
   prop_caching
+  prop_caching_adjlist
   zapsmall
 )
 # igraph_power_law_fit() output is only deterministic when running with 1 thread
@@ -1020,6 +1025,7 @@ add_benchmarks(
   igraph_delaunay_graph
   igraph_distances
   igraph_ecc
+  igraph_hamming
   igraph_induced_subgraph
   igraph_induced_subgraph_edges
   igraph_layout_umap
